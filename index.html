@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ประเมินขอขายราคาพิเศษ</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;800&display=swap">
+<style>
+:root{--bg:#f3efe8;--card:#fff;--ink:#1d1b18;--mute:#6b665e;--line:#ddd6c9;--acc:#c2410c;--ok:#15803d;--okbg:#dcfce7;--warn:#a16207;--warnbg:#fef3c7;--bad:#b91c1c;--badbg:#fee2e2;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171513;--card:#23201c;--ink:#f1ece3;--mute:#a39c90;--line:#3a352e;--acc:#fb923c;--ok:#4ade80;--okbg:#14351f;--warn:#fbbf24;--warnbg:#3b2f0d;--bad:#f87171;--badbg:#421616}}
+:root[data-theme="dark"]{--bg:#171513;--card:#23201c;--ink:#f1ece3;--mute:#a39c90;--line:#3a352e;--acc:#fb923c;--ok:#4ade80;--okbg:#14351f;--warn:#fbbf24;--warnbg:#3b2f0d;--bad:#f87171;--badbg:#421616}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Noto Sans Thai",system-ui,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:16px}
+h1{font-size:22px;font-weight:800;margin:4px 0 2px}.sub{color:var(--mute);margin:0 0 14px}
+.grid{display:grid;gap:14px;grid-template-columns:1fr}@media(min-width:860px){.grid{grid-template-columns:1.1fr .9fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px}
+.card h2{font-size:14px;margin:0 0 10px;color:var(--acc);letter-spacing:.02em}
+label{display:block;font-size:12.5px;color:var(--mute);margin:8px 0 3px}
+input,select{width:100%;box-sizing:border-box;padding:9px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink);font:inherit}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chk{display:flex;align-items:center;gap:8px;margin-top:8px;color:var(--ink);font-size:14px}.chk input{width:auto}
+.verdict{border-radius:10px;padding:14px;font-weight:800;font-size:19px;margin-bottom:12px}
+.ok{background:var(--okbg);color:var(--ok)}.warn{background:var(--warnbg);color:var(--warn)}.bad{background:var(--badbg);color:var(--bad)}
+.verdict small{display:block;font-weight:400;font-size:13px;margin-top:3px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}td,th{padding:5px 4px;border-bottom:1px solid var(--line);text-align:left}td:last-child,th:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.tot td{font-weight:800}.mute{color:var(--mute);font-size:12.5px}
+button{font:inherit;padding:9px 14px;border-radius:7px;border:1px solid var(--acc);background:var(--acc);color:#fff;cursor:pointer;margin:8px 8px 0 0}button.g{background:transparent;color:var(--acc)}button:disabled{opacity:.45;cursor:default}
+#gate{position:fixed;inset:0;z-index:9;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px}#gate .card{width:100%;max-width:320px;text-align:center}#gate button{width:100%;margin:8px 0 0}
+.bar{height:9px;background:var(--line);border-radius:5px;overflow:hidden;margin:4px 0 8px}.bar i{display:block;height:100%;background:var(--acc)}
+#items input{padding:5px}#items td:last-child{text-align:center}</style></head><body><div class="wrap">
+<h1>ประเมินขอขายราคาพิเศษ</h1><p class="sub">กรอกข้อมูลทางซ้าย ผลและคะแนนอยู่ทางขวา · ผลนี้เป็นคำแนะนำ ต้องขออนุมัติบอสทุกครั้งที่ขายต่ำกว่าราคาจัดซื้อ</p>
+<div class="grid"><div>
+<div class="card"><h2>1 · สินค้าและเส้นทาง</h2><label>รหัสเซลของคุณ (ใช้ก่อนให้ AI อ่านรูป และก่อนบันทึก)</label><input id="scode" type="password" autocomplete="off"><div class="r2"><div><label>คลังที่ส่ง</label><select id="wh"><option>คลังกรุงเทพ</option><option>คลังพัทยา</option></select></div><div><label>เวลาส่ง</label><select id="shift"><option value="in">ส่งในเวลางาน</option><option value="out">ส่งนอกเวลางาน</option></select></div><div id="otbox" style="grid-column:1/-1;display:none"><label>ค่าแรงคนขับ+ยกของ นอกเวลา (บาท/เที่ยว) · กรอกเอง รวมค่าเพิ่มพนักงานแล้ว</label><input id="laborOT" type="number" step="any"></div></div>
+<div class="r2"><div style="grid-column:1/-1"><label>เลขที่ใบเสนอราคา</label><input id="qno"><label>แนบใบเสนอราคา (รูป)</label><input id="quo" type="file" accept="image/*"><button id="qai" class="g" type="button">ให้ AI อ่านรายการและราคา</button><span id="qmsg" class="mute"></span><label>รายการสินค้า · AI อ่านให้ เซลกรอก "ต้นทุน/หน่วย" เอง</label><table id="items"></table><button id="addrow" class="g" type="button">+ เพิ่มรายการเอง</button></div><div><label>รวมกี่เที่ยว (ทั้งใบเสนอราคา)</label><input id="trips" type="number" value="1"></div>
+<div><label>ต้นทาง</label><input id="from"></div><div><label>ปลายทาง</label><input id="to"></div>
+<div><label>ระยะขาไป (กม.)</label><input id="kmo" type="number" step="any"></div><div><label>ระยะขากลับ (กม.)</label><input id="kmb" type="number" step="any"></div></div>
+<label class="chk"><input id="fac" type="checkbox">โรงงานส่งให้ (ไม่มีต้นทุนขนส่ง)</label></div>
+<div class="card" style="margin-top:14px"><h2>2 · ลูกค้าและเงื่อนไข</h2>
+<div class="r2"><div><label>รหัสลูกค้า</label><input id="ccode"></div><div><label>ชื่อลูกค้า</label><input id="cname"></div>
+<div><label>ประเภทลูกค้า</label><select id="ctype"><option>เงินสด</option><option>เครดิต</option></select></div>
+<div style="grid-column:1/-1"><label>แนบตารางยอดซื้อของลูกค้า (รูปแคปหน้าจอ)</label><input id="img" type="file" accept="image/*"><button id="ai" class="g" type="button">ให้ AI อ่านยอดซื้อ</button><span id="aimsg" class="mute"></span><label>ยอดซื้อสะสม (บาท) · AI ใส่ให้ แก้ได้</label><input id="cum" type="number"><div id="aires" class="mute"></div></div>
+<div><label>หน้างานต่อเนื่องหรือไม่</label><select id="cont"><option>ใช่</option><option>ไม่ใช่</option></select></div>
+<div><label>คิวรถยังเหลือไหม</label><select id="queue"><option>เหลือ</option><option>เต็ม</option></select></div></div></div>
+</div><div>
+<div id="verdict" class="verdict warn">กรอกข้อมูลเพื่อดูผล</div>
+<div class="card"><h2>คำนวณต่อเที่ยว</h2><table id="t1"></table></div>
+<div class="card" style="margin-top:14px"><h2>คะแนน <span id="sc"></span></h2><table id="t2"></table></div>
+<div class="card" style="margin-top:14px"><h2>กำไรรวมทุกเที่ยว</h2><table id="t3"></table>
+<button id="copy" class="g">คัดลอกสรุปส่งไลน์</button><button id="save" disabled>บันทึกเข้าโควตาปี</button><span id="msg" class="mute"></span></div>
+<div class="card" style="margin-top:14px"><h2>โควตาราคาพิเศษที่อนุมัติแล้วทั้งปี</h2><div id="quota" class="mute">กำลังโหลด…</div></div>
+</div></div>
+
+</div>
+<script>
+const API='วาง_URL_ของ_Apps_Script_ที่นี่';
+function gs(fn,...a){return fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn,args:a})}).then(r=>r.json()).then(j=>{if(j.error)throw new Error(j.error);return j.result})}
+function toB64(file){return new Promise((ok,no)=>{const im=new Image(),u=URL.createObjectURL(file);im.onload=()=>{const k=Math.min(1,1800/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c.toDataURL('image/jpeg',0.85).split(',')[1])};im.onerror=()=>no(new Error('อ่านไฟล์รูปไม่ได้'));im.src=u})}
+async function aiRead(p,fl){return await gs('aiRead',await toB64(fl[0]),p,$('scode').value)}
+
+const $=id=>document.getElementById(id),n=id=>parseFloat($(id).value)||0,f=x=>Math.round(x).toLocaleString('th-TH');
+const CFG={fuel:40.7,kmpl:3.0,laborKm:12.5,depKm:0.8,minTrip:900,targetTrip:1100,normalTrip:2500,quotaTrips:3000,minMargin:25};
+const LBL={fuel:'ราคาน้ำมัน (บาท/ลิตร)',kmpl:'อัตราสิ้นเปลือง (กม./ลิตร)',laborKm:'ค่าแรงคน+ยกของ (บาท/กม.)',depKm:'ค่าเสื่อมรถ (บาท/กม.)',minTrip:'กำไรต่อเที่ยวขั้นต่ำ',targetTrip:'กำไรต่อเที่ยวเป้าราคาพิเศษ',normalTrip:'กำไรเฉลี่ยที่ต้องได้/เที่ยว',quotaTrips:'โควตาเที่ยวราคาพิเศษ/ปี',minMargin:'กำไรสุทธิขั้นต่ำ % ของบิล'};
+let items=[{d:'',q:0,p:0,c:0}],quoNo='',R=null,db=null,used={trips:0,profit:0,n:0};
+function need(m){return m>=25?4:m>=15?6:8}
+function calc(){
+ const fac=$('fac').checked,needLab=!$('fac').checked&&$('shift').value==='out'&&!n('laborOT'),trips=Math.max(1,n('trips')),QT=items.reduce((a,x)=>a+x.q*x.p,0),QC=items.reduce((a,x)=>a+x.q*x.c,0),needCost=items.length>0&&items.some(x=>!(x.c>0)),bill=QT/trips,gp=(QT-QC)/trips,km=fac?0:n('kmo')+n('kmb');
+ const fuel=km/CFG.kmpl*CFG.fuel,lab=fac?0:($('shift').value==='out'?n('laborOT'):km*CFG.laborKm),dep=km*CFG.depKm,ship=fuel+lab+dep,net=gp-ship,m=bill?net/bill*100:0;
+ const s=[['ระยะทาง / โรงงานส่ง',fac||km===0?2:km<30?1:0,'โรงงาน +2 · ไป-กลับ<30 กม. +1'],['ประเภทลูกค้า',$('ctype').value==='เงินสด'?1:0,'เงินสด +1'],['หน้างานต่อเนื่อง',$('cont').value==='ใช่'?1:0,'ใช่ +1'],['จำนวนเที่ยว',trips>=5?1:0,'5 เที่ยวขึ้นไป +1'],
+ ['ยอดซื้อสะสม',n('cum')>=1e6?4:n('cum')>=7e5?3:n('cum')>=5e5?2:n('cum')>=2e5?1:0,'2แสน+1 · 5แสน+2 · 7แสน+3 · 1ล้าน+4']];
+ const sc=s.reduce((a,x)=>a+x[1],0),req=need(m),minOk=fac||gp>=CFG.minTrip;
+ let cls,txt,why;
+ if(!bill){cls='warn';txt='กรอกข้อมูลเพื่อดูผล';why=''}
+ else if(needCost){cls='warn';txt='กรอกต้นทุนทุกรายการก่อน';why='ใบเสนอราคามีรายการที่ยังไม่มีต้นทุน'}
+ else if(needLab){cls='warn';txt='กรอกค่าแรงนอกเวลาก่อน';why='ส่งนอกเวลางานต้องใส่ค่าแรงคนขับ+ยกของเอง'}
+ else if(net<=0){cls='bad';txt='ไม่ผ่าน';why='กำไรสุทธิหลังหักค่าส่งติดลบหรือเป็นศูนย์'}
+ else if($('queue').value==='เต็ม'){cls='bad';txt='ไม่ผ่าน';why='คิวรถเต็ม'}
+ else if(sc>=req&&minOk){cls='ok';txt='แนะนำอนุมัติ';why=`คะแนน ${sc} ถึงขั้นต่ำ ${req} (กำไร ${m.toFixed(0)}%)`}
+ else{cls='warn';txt='ส่งบอสพร้อมเหตุผลพิเศษ';why=(sc<req?`คะแนน ${sc} ต่ำกว่าขั้นต่ำ ${req} สำหรับกำไร ${m.toFixed(0)}%. `:'')+(minOk?'':`กำไรต่อเที่ยว ${f(gp)} ต่ำกว่าขั้นต่ำ ${f(CFG.minTrip)}`)}
+ $('verdict').className='verdict '+cls;$('verdict').innerHTML=txt+'<small>'+why+'</small>';
+ $('t1').innerHTML=`<tr><td>ยอดบิลต่อเที่ยว</td><td>${f(bill)}</td></tr><tr><td>กำไรสินค้าต่อเที่ยว</td><td>${f(gp)}</td></tr><tr><td>ค่าน้ำมัน (${km.toFixed(1)} กม.)</td><td>−${f(fuel)}</td></tr><tr><td>ค่าแรง+ยกของ${$('shift').value==='out'?' (นอกเวลา)':''}</td><td>−${f(lab)}</td></tr><tr><td>ค่าเสื่อมรถ</td><td>−${f(dep)}</td></tr><tr class="tot"><td>กำไรสุทธิต่อเที่ยว</td><td>${f(net)} (${m.toFixed(1)}%)</td></tr>`;
+ $('sc').textContent=`${sc} / 9 · ขั้นต่ำที่ต้องได้ ${req}`;
+ $('t2').innerHTML=s.map(x=>`<tr><td>${x[0]}<div class="mute">${x[2]}</div></td><td>+${x[1]}</td></tr>`).join('');
+ const tg=gp*trips,tn=net*trips,tmin=CFG.minTrip*trips,ttar=CFG.targetTrip*trips,burden=Math.max(0,CFG.normalTrip-gp)*trips;
+ $('t3').innerHTML=`<tr><td>กำไรสินค้ารวม ${trips} เที่ยว</td><td>${f(tg)}</td></tr><tr><td>กำไรสุทธิรวม (หลังค่าส่ง)</td><td>${f(tn)}</td></tr><tr><td>ควรได้ขั้นต่ำ (${f(CFG.minTrip)}/เที่ยว)</td><td>${f(tmin)}</td></tr><tr><td>เป้าราคาพิเศษ (${f(CFG.targetTrip)}/เที่ยว)</td><td>${f(ttar)}</td></tr><tr class="tot"><td>ภาระที่ให้สินค้าปกติชดเชย</td><td>${f(burden)}</td></tr>`;
+ R={cls,txt,sc,req,gp,net,m,trips,tg,tn,bill};$('save').disabled=!(db&&bill&&cls!=='bad');
+}
+document.querySelectorAll('.card input,.card select').forEach(e=>{if(!e.dataset.k)e.oninput=calc,e.onchange=calc});
+$('copy').onclick=()=>{if(!R)return;const t=`ขออนุมัติขายราคาพิเศษ (${$('wh').value} · ${$('shift').value==='out'?'ส่งนอกเวลางาน':'ส่งในเวลางาน'})\nลูกค้า: ${$('ccode').value} ${$('cname').value} (${$('ctype').value}, ยอดสะสม ${f(n('cum'))}${period?' '+period:''})\nใบเสนอราคา ${$('qno').value}: ${items.map(x=>x.d+' '+x.q+'×'+x.p+' (ทุน '+x.c+')').join('; ')}\nรวม ${R.trips} เที่ยว\nเส้นทาง: ${$('from').value} → ${$('to').value} ${$('fac').checked?'(โรงงานส่ง)':`ไป-กลับ ${(n('kmo')+n('kmb')).toFixed(1)} กม.`}\nกำไรสุทธิ/เที่ยว ${f(R.net)} (${R.m.toFixed(1)}%) รวม ${f(R.tn)}\nคะแนน ${R.sc}/9 (ขั้นต่ำ ${R.req}) ผล: ${R.txt}\nหน้างานต่อเนื่อง: ${$('cont').value} · คิวรถ: ${$('queue').value}`;
+ const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');$('msg').textContent='คัดลอกแล้ว'}catch(e){$('msg').textContent='คัดลอกไม่ได้'}ta.remove()};
+function drawQuota(){const p=Math.min(100,used.trips/CFG.quotaTrips*100),by=Object.entries(used.by||{}).map(([w,b])=>`${esc(w)}: ${f(b.t)} เที่ยว · กำไรสินค้า ${f(b.p)}`).join('<br>');$('quota').innerHTML=`<b style="color:var(--ink)">${f(used.trips)}</b> จาก ${f(CFG.quotaTrips)} เที่ยว (${used.n} เคส)<div class="bar"><i style="width:${p}%"></i></div>${by}<br>กำไรสินค้าสะสมรวม ${f(used.profit)} · ขั้นต่ำที่ควรได้ ${f(used.trips*CFG.minTrip)}`}
+$('save').onclick=async()=>{if(!R)return;$('msg').textContent='กำลังบันทึก…';try{const imgs=[];for(const [k,el] of [['ใบเสนอราคา',$('quo')],['ยอดซื้อ',$('img')]])if(el.files.length)imgs.push({k,d:await toB64(el.files[0])});const P={code:$('scode').value,wh:$('wh').value,shift:$('shift').value,cust:($('ccode').value+' '+$('cname').value).trim(),ctype:$('ctype').value,cum:n('cum'),period,cont:$('cont').value,queue:$('queue').value,from:$('from').value,to:$('to').value,km:n('kmo')+n('kmb'),fac:$('fac').checked,trips:R.trips,bill:R.bill*R.trips,gp:R.gp,net:R.net,m:R.m,sc:R.sc,req:R.req,res:R.txt,quo:$('qno').value,items};const r=await gs('saveRequest',P,imgs);$('msg').textContent='บันทึกแล้ว เลขที่ '+r.id+' โดย '+r.name+' (รอบอสพิจารณา)';used=r.used;drawQuota()}catch(e){$('msg').textContent='บันทึกไม่ได้: '+(e.message||e)}};
+
+let sample=null,period='';
+$('cum').addEventListener('input',()=>{period=''});
+const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function renderItems(){$('items').innerHTML=(items.length?'<tr><th>รายการ</th><th>จำนวน</th><th>ราคา/หน่วย</th><th>ต้นทุน/หน่วย</th><th></th></tr>':'')+items.map((x,i)=>`<tr><td><input data-i="${i}" data-f="d" value="${esc(x.d)}">${x.mt?'<div class="mute">ต้นทุนจาก: '+esc(x.mt)+' (ตรวจว่าตรงไหม)</div>':''}</td><td><input data-i="${i}" data-f="q" type="number" step="any" value="${x.q}" style="width:64px"></td><td><input data-i="${i}" data-f="p" type="number" step="any" value="${x.p}" style="width:76px"></td><td><input data-i="${i}" data-f="c" type="number" step="any" value="${x.c||''}" style="width:76px"></td><td><button type="button" data-del="${i}" class="g" style="margin:0;padding:4px 8px">×</button></td></tr>`).join('')}
+$('items').addEventListener('input',e=>{const t=e.target,i=t.dataset.i;if(i==null)return;items[i][t.dataset.f]=t.dataset.f==='d'?t.value:(parseFloat(t.value)||0);calc()});
+$('items').addEventListener('click',e=>{const d=e.target.dataset.del;if(d==null)return;items.splice(+d,1);renderItems();calc()});
+$('addrow').onclick=()=>{items.push({d:'',q:0,p:0,c:0});renderItems()};
+renderItems();
+
+$('wh').addEventListener('change',()=>{$('from').value=$('wh').value});$('from').value=$('wh').value;
+$('shift').addEventListener('change',()=>{$('otbox').style.display=$('shift').value==='out'?'block':'none'});
+calc();drawQuota();
+
+$('qai').onclick=async()=>{const fl=$('quo').files;if(!fl.length){$('qmsg').textContent=' เลือกรูปก่อน';return}$('qmsg').textContent=' กำลังอ่าน… (ประมาณ 10-30 วินาที)';$('qai').disabled=true;
+ try{const r=await aiRead('ภาพนี้คือใบเสนอราคาสินค้า อ่านทุกรายการสินค้าที่เห็นในภาพ ห้ามเดาตัวเลขที่อ่านไม่ออก ตอบเป็น JSON อย่างเดียว {"customer":"ชื่อลูกค้า ไม่มีให้เว้นว่าง","docno":"เลขที่ใบเสนอราคา ไม่มีให้เว้นว่าง","items":[{"desc":"รหัสและชื่อสินค้า","qty":0,"price":0}],"total":ยอดรวมท้ายใบหรือ null,"note":"สิ่งที่อ่านไม่ชัด"} qty และ price เป็นตัวเลขล้วน price คือบาทต่อหน่วย ไม่มีจุลภาค',fl);
+  items=(r.items||[]).map(x=>({d:String(x.desc||''),q:Number(x.qty)||0,p:Number(x.price)||0,c:0}));if(r.docno)$('qno').value=String(r.docno);renderItems();if(r.customer&&!$('cname').value)$('cname').value=r.customer;
+  const sum=items.reduce((a,x)=>a+x.q*x.p,0),tot=Number(r.total)||0;let m=` อ่านได้ ${items.length} รายการ · ต่อไปกรอกต้นทุนแต่ละรายการ`;
+  if(tot&&Math.abs(tot-sum)>1)m+=` · ⚠ ยอดรวมในใบ ${f(tot)} ไม่ตรงผลรวมรายการ ${f(sum)} (อาจมี VAT/ส่วนลด) ตรวจก่อน`;if(r.note)m+=' · '+r.note;$('qmsg').textContent=m;calc()
+ }catch(e){$('qmsg').textContent=' อ่านไม่สำเร็จ: '+(e.message||e)+' (กด + เพิ่มรายการเอง ได้)'}finally{$('qai').disabled=false}};
+$('ai').onclick=async()=>{const fl=$('img').files;if(!fl.length){$('aimsg').textContent=' เลือกรูปก่อน';return}$('aimsg').textContent=' กำลังอ่าน… (ประมาณ 10-30 วินาที)';$('ai').disabled=true;
+ try{const r=await aiRead('ภาพนี้คือภาพหน้าจอตารางสรุปยอดซื้อของลูกค้าแต่ละเดือน อ่านเฉพาะตัวเลขที่เห็นในภาพ ห้ามเดาตัวเลขที่อ่านไม่ออก ตอบเป็น JSON อย่างเดียว {"customer":"ชื่อหรือรหัสลูกค้า ไม่มีให้เว้นว่าง","period":"ช่วงเวลาที่ภาพครอบคลุม","rows":[{"month":"เดือน/ปี","amount":0}],"total":ยอดรวมที่แสดงในภาพหรือ null,"note":"สิ่งที่อ่านไม่ชัด"} amount เป็นบาท ตัวเลขล้วนไม่มีจุลภาค',fl);
+  const rows=(r.rows||[]).map(x=>({m:x.month,a:Number(x.amount)||0})),sum=rows.reduce((a,x)=>a+x.a,0),tot=Number(r.total)||0,val=rows.length?sum:tot;
+  $('cum').value=Math.round(val);period=String(r.period||'');if(r.customer&&!$('cname').value)$('cname').value=r.customer;
+  let h=rows.map(x=>`${esc(x.m)}: ${f(x.a)}`).join(' · ');if(tot&&rows.length&&Math.abs(tot-sum)>1)h+=`<br><b style="color:var(--warn)">⚠ ยอดรวมในรูป ${f(tot)} ไม่ตรงผลรวมรายเดือน ${f(sum)} กรุณาตรวจ</b>`;if(r.note)h+='<br>หมายเหตุ AI: '+esc(r.note);
+  $('aires').innerHTML='ช่วง: '+esc(period||'ไม่ระบุ')+'<br>'+h+'<br><i>AI อ่านจากรูป ตรวจตัวเลขก่อนใช้</i>';$('aimsg').textContent=' อ่านแล้ว';calc()
+ }catch(e){$('aimsg').textContent=' อ่านไม่สำเร็จ: '+(e.message||e)+' (กรอกยอดเองได้)'}finally{$('ai').disabled=false}};
+(async()=>{try{const st=await gs('getState');Object.assign(CFG,st.cfg||{});used=st.used;db=true;drawQuota();calc()}catch(e){$('quota').textContent='โหลดข้อมูลไม่ได้: '+(e.message||e)}})();
+</script></body></html>
