@@ -52,7 +52,7 @@ button{font:inherit;padding:9px 14px;border-radius:7px;border:1px solid var(--ac
 
 </div>
 <script>
-const API='วาง_URL_ของ_Apps_Script_ที่นี่';
+const API='https://script.google.com/macros/s/AKfycby9v7pG00P12u_vrXGpomXsYh7ap2ZoAhoia1HxLqhEm7CGLVPg31fhYyBHTzbRdfoxHw/exec';
 function gs(fn,...a){return fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn,args:a})}).then(r=>r.json()).then(j=>{if(j.error)throw new Error(j.error);return j.result})}
 function toB64(file){return new Promise((ok,no)=>{const im=new Image(),u=URL.createObjectURL(file);im.onload=()=>{const k=Math.min(1,1800/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c.toDataURL('image/jpeg',0.85).split(',')[1])};im.onerror=()=>no(new Error('อ่านไฟล์รูปไม่ได้'));im.src=u})}
 async function aiRead(p,fl){return await gs('aiRead',await toB64(fl[0]),p,$('scode').value)}
