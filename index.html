@@ -103,7 +103,7 @@ let items=[{code:'',price:'',cost:'',qty:'',buy:null}];
 let shipCost=0,shipSeq=0,statSeq=0,priceSeq=0,saving=false;
 const timers={};
 const debounce=(k,fn,ms)=>{clearTimeout(timers[k]);timers[k]=setTimeout(fn,ms)};
-const API='https://script.google.com/macros/s/AKfycbx06TRpWRuQiXoZ27abrjRgyEO3OUQhxTJcKXMo8wtidjShT4_6-puWO1oLCC6bM64iHg/exec';
+const API='https://script.google.com/macros/s/AKfycbxsb18RLKsl9Xd86ezQjRUOkvtV6uiv_A3No_8je__1cQcgAF88evsOZHoniXI2C_PL-Q/exec';
 const inGAS=typeof google!=='undefined'&&google.script&&google.script.run;
 const run=(fn,...a)=>inGAS
  ?new Promise((ok,no)=>google.script.run.withSuccessHandler(ok).withFailureHandler(e=>no(new Error(e.message||e)))[fn](...a))
