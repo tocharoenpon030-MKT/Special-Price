@@ -6,10 +6,10 @@
 <style>
 :root{--bg:#eef2f5;--card:#fff;--ink:#14212b;--mute:#52606d;--line:#cbd5df;--acc:#0b5d7a;--acc-ink:#fff;--soft:#e3f1f6;--ok:#146c3a;--okbg:#dff5e8;--bad:#a61b1b;--badbg:#fde4e4;--warnbg:#fff1cf;--warn:#7a5200;
 box-sizing:border-box}
-@media(prefers-color-scheme:dark){:root{--bg:#10171d;--card:#18222b;--ink:#eef3f7;--mute:#a8b6c3;--line:#34444f;--acc:#5cc3e6;--acc-ink:#06232e;--soft:#16323d;--ok:#6fdc9b;--okbg:#12361f;--bad:#ff8f8f;--badbg:#431a1a;--warnbg:#3d3010;--warn:#ffd27a}}
+@media(prefers-color-scheme:dark){:root{--bg:#10171d;--card:#18222b;--ink:#eef3f7;--mute:#a8b6c3;--line:#34444f;--acc:#5cc3e6;--acc-ink:#06232e;--soft:#16323d;--ok:#6fdc9b;--okbg:#12361f;--bad:#ff8f8f;--badbg:#431a1a;--warn:#ffd27a;--warnbg:#3d3010}}
 *{box-sizing:border-box}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 "Sarabun",system-ui,sans-serif;padding-top:env(safe-area-inset-top,0px);padding-bottom:calc(92px + env(safe-area-inset-bottom,0px))}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 "Sarabun",system-ui,sans-serif;padding-top:env(safe-area-inset-top,0px);padding-bottom:calc(150px + env(safe-area-inset-bottom,0px))}
 header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px 6px;max-width:720px;margin:0 auto}
 h1{font-size:24px;line-height:1.2;margin:0;font-weight:700}
 a.data{flex:none;background:var(--acc);color:var(--acc-ink);text-decoration:none;font-weight:700;padding:10px 18px;border-radius:10px;font-size:16px}
@@ -32,22 +32,34 @@ input[readonly]{background:var(--soft);font-weight:700}
 .item .top button{min-height:40px;padding:4px 14px;margin:0}
 .buy{margin-top:10px;font-size:16px;color:var(--mute)}
 .buy b{color:var(--ink)}
-button{font:inherit;font-weight:700;min-height:50px;padding:10px 18px;border-radius:10px;border:2px solid var(--acc);background:transparent;color:var(--acc);cursor:pointer}
+button,a.btn{font:inherit;font-weight:700;min-height:50px;padding:10px 18px;border-radius:10px;border:2px solid var(--acc);background:transparent;color:var(--acc);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
 button.full{width:100%;margin-top:12px}
 button.rm{border-color:var(--bad);color:var(--bad)}
+.verdict{border-radius:12px;padding:14px;margin:8px 0 6px}
+.verdict small{display:block;font-size:15px;font-weight:500}
+.verdict b{display:block;font-size:22px;line-height:1.3}
+.v-ok{background:var(--okbg);color:var(--ok)}.v-warn{background:var(--warnbg);color:var(--warn)}.v-na{background:var(--soft);color:var(--mute)}
 table.sum{width:100%;border-collapse:collapse;margin-top:6px}
 table.sum td{padding:9px 0;border-bottom:1px solid var(--line)}
 table.sum td:last-child{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
 table.sum tr.big td{font-size:20px;border-bottom:0}
 .bar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px))}
 .bar>div{max-width:720px;margin:0 auto}
-#save{width:100%;background:var(--acc);color:var(--acc-ink);font-size:19px;min-height:54px}
+.bar .row{display:flex;gap:10px}
+#save{flex:1;background:var(--acc);color:var(--acc-ink);font-size:19px;min-height:54px}
 #save:disabled{opacity:.5}
+#reopen{min-height:54px}
 #msg{margin:0 0 8px;padding:10px 12px;border-radius:10px;font-weight:500;display:none}
 #msg.ok{display:block;background:var(--okbg);color:var(--ok)}
 #msg.bad{display:block;background:var(--badbg);color:var(--bad)}
 #msg.warn{display:block;background:var(--warnbg);color:var(--warn)}
-.hide{display:none}
+.hide{display:none!important}
+.modal{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.6);overflow:auto;padding:calc(14px + env(safe-area-inset-top,0px)) 12px calc(14px + env(safe-area-inset-bottom,0px))}
+.sheet{max-width:640px;margin:0 auto;background:var(--card);border-radius:14px;padding:14px}
+.sheet img{width:100%;display:block;border-radius:8px;border:1px solid var(--line);background:#fff}
+.mrow{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.mrow>*{flex:1 1 140px}
+.mrow .pri{background:var(--acc);color:var(--acc-ink)}
 </style></head><body>
 <header><h1>ขอราคาพิเศษ</h1><a class="data" id="dataLink" href="#" target="_blank" rel="noopener">DATA</a></header>
 <main>
@@ -86,33 +98,68 @@ table.sum tr.big td{font-size:20px;border-bottom:0}
 <section>
  <h2>สรุป</h2>
  <p class="hint">ระบบคำนวณให้ ไม่ต้องกรอก</p>
+ <div id="verdict" class="verdict v-na"></div>
  <table class="sum" id="sum"></table>
 </section>
 
 </main>
-<div class="bar"><div><p id="msg"></p><button id="save" type="button">บันทึกข้อมูล</button></div></div>
+
+<div class="bar"><div>
+ <p id="msg"></p>
+ <div class="row"><button id="reopen" type="button" class="hide">ดูรูปสรุปล่าสุด</button><button id="save" type="button">บันทึกข้อมูล</button></div>
+</div></div>
+
+<div id="modal" class="modal hide" role="dialog" aria-modal="true" aria-label="รูปสรุปขอราคาพิเศษ">
+ <div class="sheet">
+  <img id="pic" alt="รูปสรุปขอราคาพิเศษ">
+  <p class="hint" style="margin:10px 0 0">บนมือถือ ถ้าปุ่มดาวน์โหลดไม่ทำงาน ให้กดค้างที่รูปแล้วเลือกบันทึกรูป</p>
+  <div class="mrow">
+   <a id="dl" class="btn pri" download="สรุปขอราคาพิเศษ.png" href="#">ดาวน์โหลดรูป</a>
+   <button id="share" type="button" class="hide">แชร์รูป</button>
+   <button id="close" type="button">ปิด</button>
+  </div>
+ </div>
+</div>
 
 <script>
+const API='https://script.google.com/macros/s/AKfycbxXWNA_CEcAk7oEx493w_3nckXQGxSpoM2BZ_GzfKe6_DZ7SEJmgjvhT5cQ_FKZLY8YOw/exec';
 const $=id=>document.getElementById(id);
 const num=v=>{const x=parseFloat(String(v==null?'':v).replace(/,/g,''));return isNaN(x)?0:x};
 const fmt=x=>Number(x||0).toLocaleString('th-TH',{maximumFractionDigits:2});
 const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const cls=x=>x<0?'neg':'pos';
 const SELF='ส่งเอง';
-let items=[{code:'',price:'',cost:'',qty:'',buy:null}];
-let shipCost=0,shipSeq=0,statSeq=0,priceSeq=0,saving=false;
-const timers={};
-const debounce=(k,fn,ms)=>{clearTimeout(timers[k]);timers[k]=setTimeout(fn,ms)};
-const API='https://script.google.com/macros/s/AKfycbxsb18RLKsl9Xd86ezQjRUOkvtV6uiv_A3No_8je__1cQcgAF88evsOZHoniXI2C_PL-Q/exec';
 const inGAS=typeof google!=='undefined'&&google.script&&google.script.run;
 const run=(fn,...a)=>inGAS
  ?new Promise((ok,no)=>google.script.run.withSuccessHandler(ok).withFailureHandler(e=>no(new Error(e.message||e)))[fn](...a))
  :fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn,args:a})})
    .then(r=>r.json()).then(j=>{if(j.error)throw new Error(j.error);return j.result});
 
+let items=[{code:'',price:'',cost:'',qty:'',buy:null}];
+let shipCost=0,shipSeq=0,shipBusy=false,statSeq=0,priceSeq=0,saving=false,rules=[],lastImg=null;
+const timers={};
+const debounce=(k,fn,ms)=>{clearTimeout(timers[k]);timers[k]=setTimeout(fn,ms)};
+
 function fillSelect(id,arr){$(id).innerHTML=arr.map(v=>`<option>${esc(v)}</option>`).join('')}
 function isSelf(){return $('delivery').value.trim()===SELF}
 function say(t,k){const m=$('msg');m.textContent=t||'';m.className=t?k:''}
+
+/* ---- หลักเกณฑ์ (อ่านจากชีท "หลักเกณฑ์") ---- */
+const OPS={'≥':(a,b)=>a>=b,'>=':(a,b)=>a>=b,'≤':(a,b)=>a<=b,'<=':(a,b)=>a<=b,'<':(a,b)=>a<b,'>':(a,b)=>a>b,'=':(a,b)=>a===b};
+function cmp(t,val){const m=t.match(/(≥|>=|≤|<=|<|>|=)\s*([\d,]+(?:\.\d+)?)/);return m?OPS[m[1]](val,parseFloat(m[2].replace(/,/g,''))):false}
+function condOk(t,c){
+ t=String(t).trim();if(!t)return true;
+ if(t.indexOf('ประเภทลูกค้า')===0)return c.type.trim()===t.replace('ประเภทลูกค้า','').trim();
+ if(t.indexOf('ยอดซื้อสะสม')>-1)return cmp(t,c.cum);
+ if(t.indexOf('กำไร')>-1)return cmp(t,c.profit);
+ if(t.indexOf('หน้างาน')>-1)return c.cont.trim()===(/ไม่/.test(t)?'ไม่ใช่':'ใช่');
+ if(t==='โรงงานส่ง'||t==='ส่งเอง')return c.delivery.trim()===t;
+ return false;
+}
+function evaluate(c){
+ for(const r of rules){if(r.conds.every(t=>condOk(t,c)))return {text:`${r.result} (${r.name})`,ok:r.result.indexOf('ส่งพิจารณา')<0}}
+ return {text:'ไม่เข้าเกณฑ์ ส่งพิจารณา',ok:false};
+}
 
 /* ---- รายการสินค้า ---- */
 function renderItems(){
@@ -173,7 +220,7 @@ function checkStats(){
    const r=await run('getCustomerStats',$('code').value);
    if(my!==statSeq)return;
    $('stats').innerHTML=`รหัส <b>${esc($('code').value.trim())}</b> ขอราคาพิเศษไปแล้ว <b>${fmt(r.count)}</b> ครั้ง<br>ได้ราคาต่างจากราคาจัดซื้อรวม <b class="${cls(r.diff)}">${fmt(r.diff)}</b> บาท`+
-    `<div class="hint" style="margin:6px 0 0">นับตามเลขที่ใบเสนอราคาไม่ซ้ำ · ติดลบ = ขายต่ำกว่าราคาจัดซื้อ</div>`;
+    `<div class="hint" style="margin:6px 0 0">นับเฉพาะใบเสนอราคาที่อนุมัติแล้ว · ติดลบ = ขายต่ำกว่าราคาจัดซื้อ</div>`;
   }catch(e){$('stats').textContent='อ่านข้อมูลไม่ได้: '+e.message}
  },400);
 }
@@ -183,26 +230,32 @@ $('code').addEventListener('input',()=>{statSeq++});
 /* ---- ต้นทุนขนส่ง ---- */
 function checkShip(){
  const self=isSelf();$('kmBox').classList.toggle('hide',!self);
- if(!self||num($('km').value)<=0){shipSeq++;shipCost=0;$('ship').value=self?'':'0';recalc();return}
- $('ship').value='กำลังคำนวณ…';
+ if(!self||num($('km').value)<=0){shipSeq++;shipBusy=false;shipCost=0;$('ship').value=self?'':'0';recalc();return}
+ $('ship').value='กำลังคำนวณ…';shipBusy=true;recalc();
  debounce('ship',async()=>{
   const my=++shipSeq;
-  try{const c=await run('getShipCost',num($('km').value));if(my!==shipSeq)return;shipCost=c;$('ship').value=fmt(c);recalc()}
-  catch(e){if(my===shipSeq){$('ship').value='คำนวณไม่ได้';say(e.message,'bad')}}
+  try{const c=await run('getShipCost',num($('km').value));if(my!==shipSeq)return;shipCost=c;shipBusy=false;$('ship').value=fmt(c);recalc()}
+  catch(e){if(my===shipSeq){shipBusy=false;$('ship').value='คำนวณไม่ได้';say(e.message,'bad')}}
  },500);
 }
 $('delivery').onchange=checkShip;$('km').addEventListener('input',checkShip);
 
-/* ---- สรุป (ข้อ 17-20) ---- */
+/* ---- สรุป (ข้อ 17-20) + ผลอนุมัติเบื้องต้น ---- */
 function calc(){
  const trips=Math.max(1,num($('trips').value));
- let gross=0,diff=0,missing=0;
- items.forEach(x=>{gross+=(num(x.price)-num(x.cost))*num(x.qty);if(typeof x.buy==='number')diff+=(num(x.price)-x.buy)*num(x.qty);else if(x.code.trim())missing++});
+ let gross=0,diff=0;
+ items.forEach(x=>{gross+=(num(x.price)-num(x.cost))*num(x.qty);if(typeof x.buy==='number')diff+=(num(x.price)-x.buy)*num(x.qty)});
  const ship=isSelf()?shipCost:0,perTrip=gross/trips-ship;
- return {trips,gross,ship,perTrip,all:perTrip*trips,diff,missing};
+ return {trips,gross,ship,perTrip,all:perTrip*trips,diff};
+}
+function ctx(profit){return {type:$('ctype').value,delivery:$('delivery').value,cum:num($('cum').value),cont:$('cont').value,profit}}
+function ready(){
+ return $('cum').value!==''&&items.some(x=>num(x.price)>0&&num(x.qty)>0)&&!shipBusy&&(!isSelf()||num($('km').value)>0)&&rules.length>0;
 }
 function recalc(){
- const c=calc();
+ const c=calc(),v=$('verdict');
+ if(ready()){const r=evaluate(ctx(c.perTrip));v.className='verdict '+(r.ok?'v-ok':'v-warn');v.innerHTML=`<small>ผลอนุมัติเบื้องต้น</small><b>${esc(r.text)}</b>`}
+ else{v.className='verdict v-na';v.innerHTML='<small>ผลอนุมัติเบื้องต้น</small><b>กรอกข้อมูลให้ครบเพื่อดูผล</b>'}
  $('sum').innerHTML=
   `<tr><td>กำไรสินค้ารวมทุกรายการ</td><td>${fmt(c.gross)}</td></tr>`+
   `<tr><td>หารจำนวนรอบ (${fmt(c.trips)} รอบ)</td><td>${fmt(c.gross/c.trips)}</td></tr>`+
@@ -211,7 +264,76 @@ function recalc(){
   `<tr class="big"><td>สรุปกำไรทั้งหมด</td><td class="${cls(c.all)}">${fmt(c.all)}</td></tr>`+
   `<tr class="big"><td>ส่วนต่างจากราคาจัดซื้อรวม</td><td class="${cls(c.diff)}">${fmt(c.diff)}</td></tr>`;
 }
-$('trips').addEventListener('input',recalc);
+['trips','cum','ctype','cont'].forEach(id=>{$(id).addEventListener('input',recalc);$(id).addEventListener('change',recalc)});
+
+/* ---- รูปสรุป ---- */
+function rr(x,X,Y,W,H,R){x.beginPath();if(x.roundRect)x.roundRect(X,Y,W,H,R);else x.rect(X,Y,W,H);x.fill()}
+function drawSummary(x,W,s){
+ const P=44,F="'Sarabun','Noto Sans Thai',system-ui,sans-serif";
+ const T=(t,X,Y,o={})=>{x.font=`${o.w||400} ${o.s||26}px ${F}`;x.fillStyle=o.c||'#14212b';x.textAlign=o.a||'left';x.textBaseline='alphabetic';
+  let str=String(t);if(o.max){while(x.measureText(str).width>o.max&&str.length>1)str=str.slice(0,-1);if(str!==String(t))str=str.slice(0,-1)+'…'}x.fillText(str,X,Y)};
+ const money=v=>v==null?'-':fmt(v);
+ const col=v=>v==null?'#14212b':(v<0?'#a61b1b':'#146c3a');
+ let y=0;
+ x.fillStyle='#fff';x.fillRect(0,0,W,4000);
+ x.fillStyle='#0b5d7a';x.fillRect(0,0,W,104);
+ T(`สรุปขอราคาพิเศษ   วันที่ ${s.date}   เวลา ${s.time}`,P,66,{s:36,w:700,c:'#fff'});
+ y=128;
+ x.fillStyle=s.verdict.ok?'#dff5e8':'#fff1cf';rr(x,P,y,W-2*P,108,14);
+ T('ผลอนุมัติเบื้องต้น',P+24,y+38,{s:24,c:s.verdict.ok?'#146c3a':'#7a5200'});
+ T(s.verdict.text,P+24,y+84,{s:40,w:700,c:s.verdict.ok?'#146c3a':'#7a5200',max:W-2*P-48});
+ y+=108+34;
+ const sec=t=>{T(t,P,y+26,{s:30,w:700,c:'#0b5d7a'});x.fillStyle='#cbd5df';x.fillRect(P,y+40,W-2*P,2);y+=60};
+ const kv=list=>{const cw=(W-2*P)/2;list.forEach((k,i)=>{const X=P+(i%2)*cw,Y=y+Math.floor(i/2)*74;
+   T(k[0],X,Y+22,{s:22,c:'#52606d'});T(k[1],X,Y+54,{s:28,w:700,max:cw-16,c:k[2]||'#14212b'})});
+  y+=Math.ceil(list.length/2)*74+14};
+ sec('ลูกค้า');
+ kv([['รหัสลูกค้า',s.code],['ชื่อลูกค้า',s.name],['ประเภทลูกค้า',s.type],['หน้างานต่อเนื่อง',s.cont],['ยอดซื้อสะสม (บาท)',fmt(s.cum)],
+  ['เคยขอราคาพิเศษ (อนุมัติแล้ว)',s.stats?fmt(s.stats.count)+' ครั้ง':'-'],['ส่วนต่างจากราคาจัดซื้อสะสม (บาท)',s.stats?fmt(s.stats.diff):'-',s.stats?col(s.stats.diff):null]]);
+ sec('ใบเสนอราคาและการจัดส่ง');
+ kv([['เลขที่ใบเสนอราคา',s.quoteNo],['ชื่อเซล',s.seller],['สินค้าจากคลัง',s.wh],['โรงงานส่งหรือส่งเอง',s.delivery],
+  ['ระยะทางไป+กลับ (กม.)',s.delivery.trim()===SELF?fmt(s.km):'-'],['ต้นทุนขนส่ง (บาท/เที่ยว)',fmt(s.ship)],['จำนวนที่แจ้งขนส่ง (รอบ)',fmt(s.trips)]]);
+ sec('รายการสินค้า');
+ const cx=[P+4,P+330,P+470,P+560,P+700,W-P-4];
+ x.fillStyle='#e3f1f6';x.fillRect(P,y,W-2*P,50);
+ T('รหัสสินค้า',cx[0],y+33,{s:21,w:700,c:'#0b5d7a'});
+ [['ราคาขอขาย',1],['ต้นทุน',2],['จำนวน',3],['ราคาจัดซื้อ',4],['ส่วนต่าง',5]].forEach(h=>T(h[0],cx[h[1]],y+33,{s:21,w:700,c:'#0b5d7a',a:'right'}));
+ y+=50;
+ s.items.forEach((it,i)=>{
+  if(i%2){x.fillStyle='#f4f7f9';x.fillRect(P,y,W-2*P,58)}
+  T(it.code,cx[0],y+38,{s:24,max:cx[1]-cx[0]-150});
+  T(fmt(it.price),cx[1],y+38,{s:24,a:'right'});T(fmt(it.cost),cx[2],y+38,{s:24,a:'right'});T(fmt(it.qty),cx[3],y+38,{s:24,a:'right'});
+  T(money(it.buy),cx[4],y+38,{s:24,a:'right'});T(money(it.diff),cx[5],y+38,{s:24,w:700,a:'right',c:col(it.diff)});
+  y+=58;
+ });
+ x.fillStyle='#cbd5df';x.fillRect(P,y,W-2*P,2);y+=34;
+ sec('สรุปกำไร');
+ [['สรุปกำไรต่อเที่ยว (หลังหักต้นทุนขนส่ง)',s.profitTrip],['สรุปกำไรทั้งหมด',s.profitAll],['ส่วนต่างจากราคาจัดซื้อรวม',s.diff]].forEach(r=>{
+  T(r[0],P,y+34,{s:26,max:640});T(fmt(r[1]),W-P,y+38,{s:36,w:700,a:'right',c:col(r[1])});y+=64});
+ y+=14;
+ T('ผลอนุมัติเบื้องต้นคำนวณจากหลักเกณฑ์ในระบบ',P,y+22,{s:20,c:'#52606d'});
+ y+=50;
+ return y;
+}
+async function buildImage(s){
+ try{await Promise.all([document.fonts.load('400 24px Sarabun'),document.fonts.load('700 24px Sarabun')])}catch(e){}
+ const W=1080,S=2,probe=document.createElement('canvas').getContext('2d');
+ const H=drawSummary(probe,W,s),c=document.createElement('canvas');
+ c.width=W*S;c.height=H*S;const x=c.getContext('2d');x.scale(S,S);drawSummary(x,W,s);
+ const blob=await new Promise(ok=>c.toBlob(ok,'image/png'));
+ return {url:c.toDataURL('image/png'),blob,name:`สรุปขอราคาพิเศษ_${s.quoteNo}.png`};
+}
+function showImg(){
+ if(!lastImg)return;
+ $('pic').src=lastImg.url;$('dl').href=lastImg.url;$('dl').download=lastImg.name;
+ const f=new File([lastImg.blob],lastImg.name,{type:'image/png'});
+ $('share').classList.toggle('hide',!(navigator.canShare&&navigator.canShare({files:[f]})));
+ $('modal').classList.remove('hide');
+}
+$('close').onclick=()=>$('modal').classList.add('hide');
+$('modal').addEventListener('click',e=>{if(e.target.id==='modal')$('modal').classList.add('hide')});
+$('reopen').onclick=showImg;
+$('share').onclick=async()=>{try{await navigator.share({files:[new File([lastImg.blob],lastImg.name,{type:'image/png'})],title:'สรุปขอราคาพิเศษ'})}catch(e){}};
 
 /* ---- บันทึก ---- */
 function payload(allowMissing){
@@ -221,23 +343,32 @@ function payload(allowMissing){
 }
 $('save').onclick=async()=>{
  if(saving)return;
- if(isSelf()&&$('ship').value==='กำลังคำนวณ…'){say('รอคำนวณต้นทุนขนส่งก่อน','warn');return}
+ if(shipBusy){say('รอคำนวณต้นทุนขนส่งก่อน','warn');return}
  saving=true;$('save').disabled=true;say('กำลังบันทึก…','warn');
+ const p=payload(false),sn=items.filter(x=>x.code.trim()).map(x=>({code:x.code.trim(),price:num(x.price),cost:num(x.cost),qty:num(x.qty)}));
  try{
-  let r=await run('saveRequest',payload(false));
+  let r=await run('saveRequest',p);
   if(!r.ok){
    if(!confirm('ไม่พบรหัสสินค้าในชีทราคาจัดซื้อ: '+r.missing.join(', ')+'\nจะบันทึกโดยไม่มีราคาจัดซื้อของรายการนี้หรือไม่?')){say('ยกเลิกการบันทึก','warn');return}
    r=await run('saveRequest',payload(true));
   }
-  say(`บันทึกแล้ว ${r.rows} แถว · กำไรต่อเที่ยว ${fmt(r.profitTrip)} · กำไรทั้งหมด ${fmt(r.profitAll)} · ส่วนต่างรวม ${fmt(r.diff)}`,'ok');
+  say('บันทึกแล้ว กำลังสร้างรูปสรุป…','ok');
+  let stats=null;try{stats=await run('getCustomerStats',p.code)}catch(e){}
+  const verdict=rules.length?evaluate(ctx(r.profitTrip)):{text:'-',ok:false};
+  const s={date:r.date,time:r.time,verdict,code:p.code.trim(),name:p.name.trim(),type:p.type.trim(),cont:p.cont.trim(),cum:num(p.cum),stats,
+   quoteNo:p.quoteNo.trim(),seller:p.seller.trim(),wh:p.wh.trim(),delivery:p.delivery.trim(),km:num(p.km),ship:r.ship,trips:num(p.trips),
+   items:sn.map((x,i)=>({...x,buy:r.lines[i].buy,diff:r.lines[i].diff})),profitTrip:r.profitTrip,profitAll:r.profitAll,diff:r.diff};
+  try{lastImg=await buildImage(s);$('reopen').classList.remove('hide');showImg();
+   say(`บันทึกแล้ว ${r.rows} แถว · กำไรต่อเที่ยว ${fmt(r.profitTrip)} · กำไรทั้งหมด ${fmt(r.profitAll)}`,'ok')}
+  catch(e){say('บันทึกแล้ว แต่สร้างรูปไม่ได้: '+e.message,'warn')}
   try{localStorage.setItem('seller',$('seller').value)}catch(e){}
-  resetForm();window.scrollTo({top:0,behavior:'smooth'});
+  resetForm();
  }catch(e){say(e.message,'bad')}
  finally{saving=false;$('save').disabled=false}
 };
 function resetForm(){
  ['code','cname','cum','km','quoteNo'].forEach(id=>$(id).value='');
- $('trips').value=1;$('ship').value='0';shipCost=0;
+ $('trips').value=1;$('ship').value='0';shipCost=0;shipBusy=false;
  items=[{code:'',price:'',cost:'',qty:'',buy:null}];
  $('stats').classList.add('hide');$('kmBox').classList.toggle('hide',!isSelf());
  renderItems();recalc();
@@ -248,11 +379,12 @@ function resetForm(){
  renderItems();recalc();
  try{
   const r=await run('getInit'),o=r.options;
+  rules=r.rules||[];
   $('dataLink').href=r.dataUrl;
   fillSelect('ctype',o['ประเภทลูกค้า']);fillSelect('cont',o['หน้างานต่อเนื่อง']);
   fillSelect('delivery',o['โรงงานส่งหรือส่งเอง']);fillSelect('wh',o['สินค้าจากคลัง']);
   try{$('seller').value=localStorage.getItem('seller')||''}catch(e){}
-  checkShip();
+  checkShip();recalc();
  }catch(e){say('โหลดตัวเลือกไม่ได้: '+e.message,'bad')}
 })();
 </script></body></html>
