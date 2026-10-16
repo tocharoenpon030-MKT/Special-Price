@@ -291,7 +291,7 @@ function drawSummary(x,W,s){
   y+=Math.ceil(list.length/2)*96+18};
  sec('ลูกค้า');
  kv([['รหัสลูกค้า',s.code],['ชื่อลูกค้า',s.name],['ประเภทลูกค้า',s.type],['หน้างานต่อเนื่อง',s.cont],['ยอดซื้อสะสม (บาท)',fmt(s.cum)],
-  ['ขอราคาพิเศษไปแล้ว (ครั้ง)',s.stats?fmt(s.stats.count):'-'],['ส่วนต่างสะสม (บาท)',s.stats?fmt(s.stats.diff):'-',s.stats?col(s.stats.diff):null]]);
+  ['ขอราคาพิเศษไปแล้ว (ครั้ง)',s.stats?fmt(s.stats.count):'-'],['ส่วนต่างราคาจัดซื้อสะสม (บาท)',s.stats?fmt(s.stats.diff):'-',s.stats?col(s.stats.diff):null]]);
  sec('ใบเสนอราคาและการจัดส่ง');
  kv([['เลขที่ใบเสนอราคา',s.quoteNo],['ชื่อเซล',s.seller],['สินค้าจากคลัง',s.wh],['โรงงานส่ง/ส่งเอง',s.delivery],
   ['ระยะทางไป+กลับ (กม.)',s.delivery.trim()===SELF?fmt(s.km):'-'],['ต้นทุนขนส่ง (บาท/เที่ยว)',fmt(s.ship)],['จำนวนรอบขนส่ง',fmt(s.trips)]]);
