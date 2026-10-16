@@ -122,7 +122,7 @@ table.sum tr.big td{font-size:20px;border-bottom:0}
 </div>
 
 <script>
-const API='https://script.google.com/macros/s/AKfycbxXWNA_CEcAk7oEx493w_3nckXQGxSpoM2BZ_GzfKe6_DZ7SEJmgjvhT5cQ_FKZLY8YOw/exec';
+const API='https://script.google.com/macros/s/AKfycby4Rt8QWHFjp3lcGzq3sQI2aluhKRJeTbHnf8IhQIGBUOin1644eKYyUp1Bwt0M1s4mqA/exec';
 const $=id=>document.getElementById(id);
 const num=v=>{const x=parseFloat(String(v==null?'':v).replace(/,/g,''));return isNaN(x)?0:x};
 const fmt=x=>Number(x||0).toLocaleString('th-TH',{maximumFractionDigits:2});
@@ -135,7 +135,7 @@ const run=(fn,...a)=>inGAS
  :fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn,args:a})})
    .then(r=>r.json()).then(j=>{if(j.error)throw new Error(j.error);return j.result});
 
-let items=[{code:'',price:'',cost:'',qty:'',buy:null}];
+let items=[{code:'',name:'',price:'',cost:'',qty:'',buy:null}];
 let shipCost=0,shipSeq=0,shipBusy=false,statSeq=0,priceSeq=0,saving=false,rules=[],lastImg=null;
 const timers={};
 const debounce=(k,fn,ms)=>{clearTimeout(timers[k]);timers[k]=setTimeout(fn,ms)};
@@ -179,22 +179,22 @@ function renderItems(){
 function drawBuy(i){
  const x=items[i],el=$('buy'+i);if(!el)return;
  if(!x.code.trim()){el.innerHTML='';return}
- if(x.buy===undefined){el.textContent='กำลังหาราคาจัดซื้อ…';return}
+ if(x.buy===undefined){el.textContent='กำลังหาชื่อสินค้าและราคาจัดซื้อ…';return}
  if(x.buy===null){el.innerHTML='<span class="neg">ไม่พบรหัสนี้ในชีทราคาจัดซื้อ</span>';return}
  const d=(num(x.price)-x.buy)*num(x.qty);
- el.innerHTML=`ราคาจัดซื้อปกติ <b>${fmt(x.buy)}</b>`+(x.price&&x.qty?` · ส่วนต่าง <b class="${cls(d)}">${fmt(d)}</b>`:'');
+ el.innerHTML=(x.name?`ชื่อสินค้า <b>${esc(x.name)}</b><br>`:'')+`ราคาจัดซื้อปกติ <b>${fmt(x.buy)}</b>`+(x.price&&x.qty?` · ส่วนต่าง <b class="${cls(d)}">${fmt(d)}</b>`:'');
 }
 $('items').addEventListener('input',e=>{
  const f=e.target.dataset.f,i=e.target.closest('.item').dataset.i;if(!f)return;
  items[i][f]=e.target.value;
- if(f==='code'){items[i].buy=undefined;drawBuy(i);debounce('price',loadPrices,500)}
+ if(f==='code'){items[i].buy=undefined;items[i].name='';drawBuy(i);debounce('price',loadPrices,500)}
  drawBuy(i);recalc();
 });
 $('items').addEventListener('click',e=>{
  const d=e.target.dataset.del;if(d==null)return;
  items.splice(+d,1);renderItems();recalc();
 });
-$('add').onclick=()=>{items.push({code:'',price:'',cost:'',qty:'',buy:null});renderItems();
+$('add').onclick=()=>{items.push({code:'',name:'',price:'',cost:'',qty:'',buy:null});renderItems();
  const last=document.querySelectorAll('.item input[data-f="code"]');last[last.length-1].focus()};
 
 async function loadPrices(){
@@ -203,7 +203,7 @@ async function loadPrices(){
  try{
   const r=await run('lookupPrices',$('wh').value,codes);
   if(my!==priceSeq)return;
-  items.forEach((x,i)=>{const c=x.code.trim();x.buy=c?(r[c]===undefined?null:r[c]):null;drawBuy(i)});
+  items.forEach((x,i)=>{const c=x.code.trim(),p=c?r[c]:null;x.buy=p?p.buy:null;x.name=p?p.name:'';drawBuy(i)});
   recalc();
  }catch(e){say('หาราคาจัดซื้อไม่ได้: '+e.message,'bad')}
 }
@@ -269,55 +269,59 @@ function recalc(){
 /* ---- รูปสรุป ---- */
 function rr(x,X,Y,W,H,R){x.beginPath();if(x.roundRect)x.roundRect(X,Y,W,H,R);else x.rect(X,Y,W,H);x.fill()}
 function drawSummary(x,W,s){
- const P=44,F="'Sarabun','Noto Sans Thai',system-ui,sans-serif";
- const T=(t,X,Y,o={})=>{x.font=`${o.w||400} ${o.s||26}px ${F}`;x.fillStyle=o.c||'#14212b';x.textAlign=o.a||'left';x.textBaseline='alphabetic';
+ const P=36,F="'Sarabun','Noto Sans Thai',system-ui,sans-serif";
+ const T=(t,X,Y,o={})=>{x.font=`${o.w||400} ${o.s||30}px ${F}`;x.fillStyle=o.c||'#14212b';x.textAlign=o.a||'left';x.textBaseline='alphabetic';
   let str=String(t);if(o.max){while(x.measureText(str).width>o.max&&str.length>1)str=str.slice(0,-1);if(str!==String(t))str=str.slice(0,-1)+'…'}x.fillText(str,X,Y)};
  const money=v=>v==null?'-':fmt(v);
  const col=v=>v==null?'#14212b':(v<0?'#a61b1b':'#146c3a');
  let y=0;
- x.fillStyle='#fff';x.fillRect(0,0,W,4000);
- x.fillStyle='#0b5d7a';x.fillRect(0,0,W,104);
- T(`สรุปขอราคาพิเศษ   วันที่ ${s.date}   เวลา ${s.time}`,P,66,{s:36,w:700,c:'#fff'});
- y=128;
- x.fillStyle=s.verdict.ok?'#dff5e8':'#fff1cf';rr(x,P,y,W-2*P,108,14);
- T('ผลอนุมัติเบื้องต้น',P+24,y+38,{s:24,c:s.verdict.ok?'#146c3a':'#7a5200'});
- T(s.verdict.text,P+24,y+84,{s:40,w:700,c:s.verdict.ok?'#146c3a':'#7a5200',max:W-2*P-48});
- y+=108+34;
- const sec=t=>{T(t,P,y+26,{s:30,w:700,c:'#0b5d7a'});x.fillStyle='#cbd5df';x.fillRect(P,y+40,W-2*P,2);y+=60};
- const kv=list=>{const cw=(W-2*P)/2;list.forEach((k,i)=>{const X=P+(i%2)*cw,Y=y+Math.floor(i/2)*74;
-   T(k[0],X,Y+22,{s:22,c:'#52606d'});T(k[1],X,Y+54,{s:28,w:700,max:cw-16,c:k[2]||'#14212b'})});
-  y+=Math.ceil(list.length/2)*74+14};
+ x.fillStyle='#fff';x.fillRect(0,0,W,6000);
+ x.fillStyle='#0b5d7a';x.fillRect(0,0,W,150);
+ T('สรุปขอราคาพิเศษ',P,66,{s:50,w:700,c:'#fff'});
+ T(`วันที่ ${s.date}   เวลา ${s.time}`,P,118,{s:34,c:'#e3f1f6'});
+ y=176;
+ const vc=s.verdict.ok?'#146c3a':'#7a5200';
+ x.fillStyle=s.verdict.ok?'#dff5e8':'#fff1cf';rr(x,P,y,W-2*P,150,16);
+ T('ผลอนุมัติเบื้องต้น',P+26,y+48,{s:30,c:vc});
+ T(s.verdict.text,P+26,y+112,{s:46,w:700,c:vc,max:W-2*P-52});
+ y+=150+40;
+ const sec=t=>{T(t,P,y+38,{s:40,w:700,c:'#0b5d7a'});x.fillStyle='#cbd5df';x.fillRect(P,y+54,W-2*P,3);y+=80};
+ const kv=list=>{const cw=(W-2*P)/2;list.forEach((k,i)=>{const X=P+(i%2)*cw,Y=y+Math.floor(i/2)*96;
+   T(k[0],X,Y+30,{s:28,c:'#52606d',max:cw-12});T(k[1],X,Y+74,{s:38,w:700,max:cw-12,c:k[2]||'#14212b'})});
+  y+=Math.ceil(list.length/2)*96+18};
  sec('ลูกค้า');
  kv([['รหัสลูกค้า',s.code],['ชื่อลูกค้า',s.name],['ประเภทลูกค้า',s.type],['หน้างานต่อเนื่อง',s.cont],['ยอดซื้อสะสม (บาท)',fmt(s.cum)],
-  ['เคยขอราคาพิเศษ (อนุมัติแล้ว)',s.stats?fmt(s.stats.count)+' ครั้ง':'-'],['ส่วนต่างจากราคาจัดซื้อสะสม (บาท)',s.stats?fmt(s.stats.diff):'-',s.stats?col(s.stats.diff):null]]);
+  ['ขอราคาพิเศษไปแล้ว (ครั้ง)',s.stats?fmt(s.stats.count):'-'],['ส่วนต่างสะสม (บาท)',s.stats?fmt(s.stats.diff):'-',s.stats?col(s.stats.diff):null]]);
  sec('ใบเสนอราคาและการจัดส่ง');
- kv([['เลขที่ใบเสนอราคา',s.quoteNo],['ชื่อเซล',s.seller],['สินค้าจากคลัง',s.wh],['โรงงานส่งหรือส่งเอง',s.delivery],
-  ['ระยะทางไป+กลับ (กม.)',s.delivery.trim()===SELF?fmt(s.km):'-'],['ต้นทุนขนส่ง (บาท/เที่ยว)',fmt(s.ship)],['จำนวนที่แจ้งขนส่ง (รอบ)',fmt(s.trips)]]);
+ kv([['เลขที่ใบเสนอราคา',s.quoteNo],['ชื่อเซล',s.seller],['สินค้าจากคลัง',s.wh],['โรงงานส่ง/ส่งเอง',s.delivery],
+  ['ระยะทางไป+กลับ (กม.)',s.delivery.trim()===SELF?fmt(s.km):'-'],['ต้นทุนขนส่ง (บาท/เที่ยว)',fmt(s.ship)],['จำนวนรอบขนส่ง',fmt(s.trips)]]);
  sec('รายการสินค้า');
- const cx=[P+4,P+330,P+470,P+560,P+700,W-P-4];
- x.fillStyle='#e3f1f6';x.fillRect(P,y,W-2*P,50);
- T('รหัสสินค้า',cx[0],y+33,{s:21,w:700,c:'#0b5d7a'});
- [['ราคาขอขาย',1],['ต้นทุน',2],['จำนวน',3],['ราคาจัดซื้อ',4],['ส่วนต่าง',5]].forEach(h=>T(h[0],cx[h[1]],y+33,{s:21,w:700,c:'#0b5d7a',a:'right'}));
- y+=50;
+ const cw3=(W-2*P-40)/3;
  s.items.forEach((it,i)=>{
-  if(i%2){x.fillStyle='#f4f7f9';x.fillRect(P,y,W-2*P,58)}
-  T(it.code,cx[0],y+38,{s:24,max:cx[1]-cx[0]-150});
-  T(fmt(it.price),cx[1],y+38,{s:24,a:'right'});T(fmt(it.cost),cx[2],y+38,{s:24,a:'right'});T(fmt(it.qty),cx[3],y+38,{s:24,a:'right'});
-  T(money(it.buy),cx[4],y+38,{s:24,a:'right'});T(money(it.diff),cx[5],y+38,{s:24,w:700,a:'right',c:col(it.diff)});
-  y+=58;
+  const H=262;
+  x.fillStyle=i%2?'#f4f7f9':'#ffffff';rr(x,P,y,W-2*P,H,14);
+  x.strokeStyle='#cbd5df';x.lineWidth=2;x.beginPath();if(x.roundRect)x.roundRect(P+1,y+1,W-2*P-2,H-2,14);else x.rect(P+1,y+1,W-2*P-2,H-2);x.stroke();
+  const L=P+20;
+  x.font=`700 38px ${F}`;const cwid=x.measureText(it.code).width;
+  T(it.code,L,y+56,{s:38,w:700});
+  if(it.name)T(it.name,L+cwid+22,y+56,{s:32,max:W-P-20-(L+cwid+22),c:'#14212b'});
+  const cell=(c,r,label,val,color)=>{const X=L+c*cw3,Y=y+r*92;T(label,X,Y+104,{s:26,c:'#52606d'});T(val,X,Y+146,{s:36,w:700,c:color||'#14212b',max:cw3-10})};
+  cell(0,0,'ราคาขอขาย',fmt(it.price));cell(1,0,'ต้นทุน',fmt(it.cost));cell(2,0,'จำนวน',fmt(it.qty));
+  cell(0,1,'ราคาจัดซื้อ',money(it.buy));cell(1,1,'ส่วนต่าง',money(it.diff),col(it.diff));
+  y+=H+16;
  });
- x.fillStyle='#cbd5df';x.fillRect(P,y,W-2*P,2);y+=34;
- sec('สรุปกำไร');
- [['สรุปกำไรต่อเที่ยว (หลังหักต้นทุนขนส่ง)',s.profitTrip],['สรุปกำไรทั้งหมด',s.profitAll],['ส่วนต่างจากราคาจัดซื้อรวม',s.diff]].forEach(r=>{
-  T(r[0],P,y+34,{s:26,max:640});T(fmt(r[1]),W-P,y+38,{s:36,w:700,a:'right',c:col(r[1])});y+=64});
  y+=14;
- T('ผลอนุมัติเบื้องต้นคำนวณจากหลักเกณฑ์ในระบบ',P,y+22,{s:20,c:'#52606d'});
- y+=50;
+ sec('สรุปกำไร');
+ [['กำไรต่อเที่ยว (หลังหักค่าขนส่ง)',s.profitTrip],['กำไรทั้งหมด',s.profitAll],['ส่วนต่างจากราคาจัดซื้อรวม',s.diff]].forEach(r=>{
+  T(r[0],P,y+46,{s:32,max:W-2*P-250});T(fmt(r[1]),W-P,y+50,{s:46,w:700,a:'right',c:col(r[1])});y+=82});
+ y+=18;
+ T('ผลอนุมัติเบื้องต้นคำนวณจากหลักเกณฑ์ในระบบ',P,y+26,{s:24,c:'#52606d'});
+ y+=64;
  return y;
 }
 async function buildImage(s){
  try{await Promise.all([document.fonts.load('400 24px Sarabun'),document.fonts.load('700 24px Sarabun')])}catch(e){}
- const W=1080,S=2,probe=document.createElement('canvas').getContext('2d');
+ const W=900,S=2,probe=document.createElement('canvas').getContext('2d');
  const H=drawSummary(probe,W,s),c=document.createElement('canvas');
  c.width=W*S;c.height=H*S;const x=c.getContext('2d');x.scale(S,S);drawSummary(x,W,s);
  const blob=await new Promise(ok=>c.toBlob(ok,'image/png'));
@@ -357,7 +361,7 @@ $('save').onclick=async()=>{
   const verdict=rules.length?evaluate(ctx(r.profitTrip)):{text:'-',ok:false};
   const s={date:r.date,time:r.time,verdict,code:p.code.trim(),name:p.name.trim(),type:p.type.trim(),cont:p.cont.trim(),cum:num(p.cum),stats,
    quoteNo:p.quoteNo.trim(),seller:p.seller.trim(),wh:p.wh.trim(),delivery:p.delivery.trim(),km:num(p.km),ship:r.ship,trips:num(p.trips),
-   items:sn.map((x,i)=>({...x,buy:r.lines[i].buy,diff:r.lines[i].diff})),profitTrip:r.profitTrip,profitAll:r.profitAll,diff:r.diff};
+   items:sn.map((x,i)=>({...x,name:r.lines[i].name,buy:r.lines[i].buy,diff:r.lines[i].diff})),profitTrip:r.profitTrip,profitAll:r.profitAll,diff:r.diff};
   try{lastImg=await buildImage(s);$('reopen').classList.remove('hide');showImg();
    say(`บันทึกแล้ว ${r.rows} แถว · กำไรต่อเที่ยว ${fmt(r.profitTrip)} · กำไรทั้งหมด ${fmt(r.profitAll)}`,'ok')}
   catch(e){say('บันทึกแล้ว แต่สร้างรูปไม่ได้: '+e.message,'warn')}
@@ -369,7 +373,7 @@ $('save').onclick=async()=>{
 function resetForm(){
  ['code','cname','cum','km','quoteNo'].forEach(id=>$(id).value='');
  $('trips').value=1;$('ship').value='0';shipCost=0;shipBusy=false;
- items=[{code:'',price:'',cost:'',qty:'',buy:null}];
+ items=[{code:'',name:'',price:'',cost:'',qty:'',buy:null}];
  $('stats').classList.add('hide');$('kmBox').classList.toggle('hide',!isSelf());
  renderItems();recalc();
 }
