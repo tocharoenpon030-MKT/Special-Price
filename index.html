@@ -122,7 +122,7 @@ table.sum tr.big td{font-size:20px;border-bottom:0}
 </div>
 
 <script>
-const API='https://script.google.com/macros/s/AKfycbz1-Kw3kUfYumsAga1LwcZwKQJ6DUJ0vgdqbM7fGk05zpUFxQeSUAsrTE61PR0cSh2Fjg/exec';
+const API='https://script.google.com/macros/s/AKfycbzbH4qhgERcx9Huk1bNOp94cnPDo3V8oPWtmsdDckb6o4UrCLq785Fp7tQNr83jSVsxeQ/exec';
 const $=id=>document.getElementById(id);
 const num=v=>{const x=parseFloat(String(v==null?'':v).replace(/,/g,''));return isNaN(x)?0:x};
 const fmt=x=>Number(x||0).toLocaleString('th-TH',{maximumFractionDigits:2});
@@ -405,7 +405,7 @@ function resetForm(){
 #qsend{padding:9px 16px;border:0;border-radius:8px;background:#1d5fd1;color:#fff;cursor:pointer}
 </style>
 <script>
-const QAPI='https://script.google.com/macros/s/AKfycbz1-Kw3kUfYumsAga1LwcZwKQJ6DUJ0vgdqbM7fGk05zpUFxQeSUAsrTE61PR0cSh2Fjg/exec';
+const QAPI='https://script.google.com/macros/s/AKfycbzbH4qhgERcx9Huk1bNOp94cnPDo3V8oPWtmsdDckb6o4UrCLq785Fp7tQNr83jSVsxeQ/exec';
 let qstate={items:[]};
 const qpass=()=>{let p=sessionStorage.getItem('pass');if(!p){p=prompt('รหัสผ่านทีมขาย')||'';if(p)sessionStorage.setItem('pass',p)}return p};
 const qlog=document.getElementById('qlog'),qin=document.getElementById('qin');
