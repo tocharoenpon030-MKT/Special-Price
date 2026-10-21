@@ -122,7 +122,7 @@ table.sum tr.big td{font-size:20px;border-bottom:0}
 </div>
 
 <script>
-const API='https://script.google.com/macros/s/AKfycbxWmAeGulGvPGOi_ZSR5tGvealeFNyzM3nJ_9x3pNton3lDcrvR2k6BDCSRnSbIWtLeaQ/exec';
+const API='https://script.google.com/macros/s/AKfycbzbH4qhgERcx9Huk1bNOp94cnPDo3V8oPWtmsdDckb6o4UrCLq785Fp7tQNr83jSVsxeQ/exec';
 const $=id=>document.getElementById(id);
 const num=v=>{const x=parseFloat(String(v==null?'':v).replace(/,/g,''));return isNaN(x)?0:x};
 const fmt=x=>Number(x||0).toLocaleString('th-TH',{maximumFractionDigits:2});
@@ -405,14 +405,14 @@ function resetForm(){
 #qsend{padding:9px 16px;border:0;border-radius:8px;background:#1d5fd1;color:#fff;cursor:pointer}
 </style>
 <script>
-const QAPI='https://script.google.com/macros/s/AKfycbxWmAeGulGvPGOi_ZSR5tGvealeFNyzM3nJ_9x3pNton3lDcrvR2k6BDCSRnSbIWtLeaQ/exec';
+const QAPI='https://script.google.com/macros/s/AKfycbzbH4qhgERcx9Huk1bNOp94cnPDo3V8oPWtmsdDckb6o4UrCLq785Fp7tQNr83jSVsxeQ/exec';
 let qstate={items:[]};
 const qpass=()=>{let p=sessionStorage.getItem('pass');if(!p){p=prompt('รหัสผ่านทีมขาย')||'';if(p)sessionStorage.setItem('pass',p)}return p};
 const qlog=document.getElementById('qlog'),qin=document.getElementById('qin');
 function qadd(t,me){const d=document.createElement('div');d.className='qm '+(me?'qu':'qb');d.textContent=t;qlog.appendChild(d);qlog.scrollTop=qlog.scrollHeight;return d}
-qadd('สวัสดีครับ เริ่มจากบอกรหัสลูกค้าได้เลย หรือพิมพ์หลายข้อรวดเดียวก็ได้ เช่น "ลูกค้า C001 บริษัท ABC เงินสด ยอดสะสม 1,200,000 ส่งเอง 32 กม." (พิมพ์ "เริ่มใหม่" เพื่อล้าง)');
+qadd('สวัสดีครับ ผมช่วยเช็กและคำนวณราคาพิเศษ เริ่มจากขอข้อมูลลูกค้าก่อนนะครับ (ตอบรวดเดียวได้)\n• รหัสลูกค้า\n• ยอดซื้อสะสมปัจจุบัน (บาท)\n• ประเภทลูกค้า (เงินสด / เครดิต)\n• มีหน้างานต่อเนื่องไหม (ใช่ / ไม่ใช่)\n\nพิมพ์ "เริ่มใหม่" เพื่อล้างข้อมูลเมื่อไหร่ก็ได้');
 async function qsend(){
- const m=qin.value.trim();if(!m)return;qin.value='';qadd(m,true);const w=qadd('...');
+ const m=qin.value.trim();if(!m)return;qin.value='';qadd(m,true);const w=qadd('กำลังคิด... (รอสักครู่)');
  try{
   const j=await (await fetch(QAPI,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn:'chat',args:[m,qstate],pass:qpass()})})).json();
   if(j.error){w.textContent=j.error;if(j.error.indexOf('รหัสผ่าน')>-1)sessionStorage.removeItem('pass');return}
