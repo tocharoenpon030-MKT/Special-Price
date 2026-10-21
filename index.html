@@ -67,7 +67,6 @@ table.sum tr.big td{font-size:20px;border-bottom:0}
 <section>
  <h2>ลูกค้า</h2>
  <label for="code">รหัสลูกค้า</label><input id="code" autocomplete="off" autocapitalize="characters">
- <label for="cname">ชื่อลูกค้า</label><input id="cname" autocomplete="off">
  <div class="two">
   <div><label for="ctype">ประเภทลูกค้า</label><select id="ctype"></select></div>
   <div><label for="cont">หน้างานต่อเนื่อง</label><select id="cont"></select></div>
@@ -211,7 +210,7 @@ async function loadPrices(){
 $('wh').onchange=()=>{items.forEach(x=>{if(x.code.trim())x.buy=undefined});renderItems();loadPrices()};
 
 /* ---- สถิติลูกค้า (ข้อ 1-5 ครบ) ---- */
-function statsReady(){return $('code').value.trim()&&$('cname').value.trim()&&$('ctype').value&&$('cum').value!==''&&$('cont').value}
+function statsReady(){return $('code').value.trim()&&$('ctype').value&&$('cum').value!==''&&$('cont').value}
 function checkStats(){
  if(!statsReady()){$('stats').classList.add('hide');return}
  debounce('stat',async()=>{
@@ -225,7 +224,7 @@ function checkStats(){
   }catch(e){$('stats').textContent='อ่านข้อมูลไม่ได้: '+e.message}
  },400);
 }
-['code','cname','ctype','cum','cont'].forEach(id=>{$(id).addEventListener('input',checkStats);$(id).addEventListener('change',checkStats)});
+['code','ctype','cum','cont'].forEach(id=>{$(id).addEventListener('input',checkStats);$(id).addEventListener('change',checkStats)});
 $('code').addEventListener('input',()=>{statSeq++});
 
 /* ---- ต้นทุนขนส่ง ---- */
@@ -291,7 +290,7 @@ function drawSummary(x,W,s){
    T(k[0],X,Y+30,{s:28,c:'#52606d',max:cw-12});T(k[1],X,Y+74,{s:38,w:700,max:cw-12,c:k[2]||'#14212b'})});
   y+=Math.ceil(list.length/2)*96+18};
  sec('ลูกค้า');
- kv([['รหัสลูกค้า',s.code],['ชื่อลูกค้า',s.name],['ประเภทลูกค้า',s.type],['หน้างานต่อเนื่อง',s.cont],['ยอดซื้อสะสม (บาท)',fmt(s.cum)],
+ kv([['รหัสลูกค้า',s.code],['ประเภทลูกค้า',s.type],['หน้างานต่อเนื่อง',s.cont],['ยอดซื้อสะสม (บาท)',fmt(s.cum)],
   ['ขอราคาพิเศษไปแล้ว (ครั้ง)',s.stats?fmt(s.stats.count):'-'],['ส่วนต่างราคาจัดซื้อสะสม (บาท)',s.stats?fmt(s.stats.diff):'-',s.stats?col(s.stats.diff):null]]);
  sec('ใบเสนอราคาและการจัดส่ง');
  kv([['เลขที่ใบเสนอราคา',s.quoteNo],['ชื่อเซล',s.seller],['สินค้าจากคลัง',s.wh],['โรงงานส่ง/ส่งเอง',s.delivery],
@@ -342,7 +341,7 @@ $('share').onclick=async()=>{try{await navigator.share({files:[new File([lastImg
 
 /* ---- บันทึก ---- */
 function payload(allowMissing){
- return {code:$('code').value,name:$('cname').value,type:$('ctype').value,cum:$('cum').value,cont:$('cont').value,
+ return {code:$('code').value,type:$('ctype').value,cum:$('cum').value,cont:$('cont').value,
   delivery:$('delivery').value,km:$('km').value,seller:$('seller').value,quoteNo:$('quoteNo').value,wh:$('wh').value,
   trips:$('trips').value,items:items.map(x=>({code:x.code,price:x.price,cost:x.cost,qty:x.qty})),allowMissing:!!allowMissing};
 }
@@ -360,7 +359,7 @@ $('save').onclick=async()=>{
   say('บันทึกแล้ว กำลังสร้างรูปสรุป…','ok');
   let stats=null;try{stats=await run('getCustomerStats',p.code)}catch(e){}
   const verdict=rules.length?evaluate(ctx(r.profitTrip)):{text:'-',ok:false};
-  const s={date:r.date,time:r.time,verdict,code:p.code.trim(),name:p.name.trim(),type:p.type.trim(),cont:p.cont.trim(),cum:num(p.cum),stats,
+  const s={date:r.date,time:r.time,verdict,code:p.code.trim(),type:p.type.trim(),cont:p.cont.trim(),cum:num(p.cum),stats,
    quoteNo:p.quoteNo.trim(),seller:p.seller.trim(),wh:p.wh.trim(),delivery:p.delivery.trim(),km:num(p.km),ship:r.ship,trips:num(p.trips),
    items:sn.map((x,i)=>({...x,name:r.lines[i].name,buy:r.lines[i].buy,diff:r.lines[i].diff})),profitTrip:r.profitTrip,profitAll:r.profitAll,diff:r.diff};
   try{lastImg=await buildImage(s);$('reopen').classList.remove('hide');showImg();
@@ -372,7 +371,7 @@ $('save').onclick=async()=>{
  finally{saving=false;$('save').disabled=false}
 };
 function resetForm(){
- ['code','cname','cum','km','quoteNo'].forEach(id=>$(id).value='');
+ ['code','cum','km','quoteNo'].forEach(id=>$(id).value='');
  $('trips').value=1;$('ship').value='0';shipCost=0;shipBusy=false;
  items=[{code:'',name:'',price:'',cost:'',qty:'',buy:null}];
  $('stats').classList.add('hide');$('kmBox').classList.toggle('hide',!isSelf());
@@ -410,7 +409,7 @@ let qstate={items:[]};
 const qpass=()=>{let p=sessionStorage.getItem('pass');if(!p){p=prompt('รหัสผ่านทีมขาย')||'';if(p)sessionStorage.setItem('pass',p)}return p};
 const qlog=document.getElementById('qlog'),qin=document.getElementById('qin');
 function qadd(t,me){const d=document.createElement('div');d.className='qm '+(me?'qu':'qb');d.textContent=t;qlog.appendChild(d);qlog.scrollTop=qlog.scrollHeight;return d}
-qadd('สวัสดีครับ ผมช่วยเช็กและคำนวณราคาพิเศษ เริ่มจากขอข้อมูลลูกค้าก่อนนะครับ (ตอบรวดเดียวได้)\n• รหัสลูกค้า\n• ยอดซื้อสะสมปัจจุบัน (บาท)\n• ประเภทลูกค้า (เงินสด / เครดิต)\n• มีหน้างานต่อเนื่องไหม (ใช่ / ไม่ใช่)\n\nพิมพ์ "เริ่มใหม่" เพื่อล้างข้อมูลเมื่อไหร่ก็ได้');
+qadd('สวัสดีครับ ผมช่วยเช็กและคำนวณราคาพิเศษ เริ่มจากขอข้อมูลลูกค้าก่อนนะครับ (ตอบรวดเดียวได้)\n• รหัสลูกค้า (ใช้เฉพาะรหัส ไม่ต้องพิมพ์ชื่อลูกค้า)\n• ยอดซื้อสะสมปัจจุบัน (บาท)\n• ประเภทลูกค้า (เงินสด / เครดิต)\n• มีหน้างานต่อเนื่องไหม (ใช่ / ไม่ใช่)\n\nพิมพ์ "เริ่มใหม่" เพื่อล้างข้อมูลเมื่อไหร่ก็ได้');
 async function qsend(){
  const m=qin.value.trim();if(!m)return;qin.value='';qadd(m,true);const w=qadd('กำลังคิด... (รอสักครู่)');
  try{
