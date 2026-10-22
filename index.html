@@ -140,7 +140,7 @@ table.sum tr.big td{font-size:20px;border-bottom:0}
 </div>
 
 <script>
-const API='https://script.google.com/macros/s/AKfycbyBZ51Zbiklk9MD2du6zT9RpG97sbskddZIQ8qm7CBNu42rYvf55czYJRGV0d8ddkxicw/exec';
+const API='https://script.google.com/macros/s/AKfycbxN-yPNMq3Q3kw2rCDwvvCyYTu-UI0b3A79C82uKJH0BTdSfvEEaL7fHsM8dMuOmvP3eA/exec';
 const $=id=>document.getElementById(id);
 const num=v=>{const x=parseFloat(String(v==null?'':v).replace(/,/g,''));return isNaN(x)?0:x};
 const fmt=x=>Number(x||0).toLocaleString('th-TH',{maximumFractionDigits:2});
@@ -412,7 +412,7 @@ function resetForm(){
 })();
 </script><!-- ===== ผู้ช่วย AI (สคริปต์) ===== -->
 <script>
-const QAPI='https://script.google.com/macros/s/AKfycbyBZ51Zbiklk9MD2du6zT9RpG97sbskddZIQ8qm7CBNu42rYvf55czYJRGV0d8ddkxicw/exec';
+const QAPI='https://script.google.com/macros/s/AKfycbxN-yPNMq3Q3kw2rCDwvvCyYTu-UI0b3A79C82uKJH0BTdSfvEEaL7fHsM8dMuOmvP3eA/exec';
 let qstate={items:[]},qbusy=false;
 const qlog=document.getElementById('qlog'),qin=document.getElementById('qin');
 const qpass=()=>{let p=sessionStorage.getItem('pass');if(!p){p=prompt('รหัสผ่านทีมขาย')||'';if(p)sessionStorage.setItem('pass',p)}return p};
