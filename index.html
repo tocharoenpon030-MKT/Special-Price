@@ -81,6 +81,8 @@ table.sum tr.big td{font-size:20px;border-bottom:0}
 #qsec #qsend,#qsec .qtw button,#qsec .qact button{background:var(--qacc);color:var(--qink);border-color:var(--qacc)}
 #qsec .qtw th{background:var(--qbg);white-space:pre-line;max-width:120px;font-weight:600}
 #qsec .qtw th,#qsec .qtw td{border-color:var(--qline)}
+#qsec .qact button.green{background:#62c98a;border-color:#62c98a;color:#072a15;font-weight:600}
+@media(prefers-color-scheme:dark){#qsec .qact button.green{background:#6fd39a;border-color:#6fd39a;color:#0b2616}}
 </style></head><body>
 <header><h1>ขอราคาพิเศษ</h1><a class="data" id="dataLink" href="#" target="_blank" rel="noopener">DATA</a></header>
 <main>
@@ -148,7 +150,7 @@ table.sum tr.big td{font-size:20px;border-bottom:0}
 </div>
 
 <script>
-const API='https://script.google.com/macros/s/AKfycbzsOvSrei5o48au0M5sLrjVSWz_OpUEJrk9Nc2RFm-LoDa3sTq67BWR7h9Y6wJ4y2mcvw/exec';
+const API='https://script.google.com/macros/s/AKfycbz-vAu_hTksh19hm-WQy_30OkPXbNrNsvo3TFiUo38KlGJLiqoDIRWGHQ2c2RYNisF-Fg/exec';
 const $=id=>document.getElementById(id);
 const num=v=>{const x=parseFloat(String(v==null?'':v).replace(/,/g,''));return isNaN(x)?0:x};
 const fmt=x=>Number(x||0).toLocaleString('th-TH',{maximumFractionDigits:2});
@@ -420,12 +422,12 @@ function resetForm(){
 })();
 </script><!-- ===== ผู้ช่วย AI (สคริปต์) ===== -->
 <script>
-const QAPI='https://script.google.com/macros/s/AKfycbzsOvSrei5o48au0M5sLrjVSWz_OpUEJrk9Nc2RFm-LoDa3sTq67BWR7h9Y6wJ4y2mcvw/exec';
+const QAPI='https://script.google.com/macros/s/AKfycbz-vAu_hTksh19hm-WQy_30OkPXbNrNsvo3TFiUo38KlGJLiqoDIRWGHQ2c2RYNisF-Fg/exec';
 let qstate={items:[]},qbusy=false;
 const qlog=document.getElementById('qlog'),qin=document.getElementById('qin');
 const qpass=()=>{let p=sessionStorage.getItem('pass');if(!p){p=prompt('รหัสผ่านทีมขาย')||'';if(p)sessionStorage.setItem('pass',p)}return p};
 function qadd(t,me){const d=document.createElement('div');d.className='qm '+(me?'qu':'qb');d.textContent=t;qlog.appendChild(d);qlog.scrollTop=qlog.scrollHeight;return d}
-function qbtn(label,fn){const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=fn;return b}
+function qbtn(label,fn,cls){const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=fn;if(cls)b.className=cls;return b}
 function qtable(t,box){
  const w=document.createElement('div');w.className='qtw';const tb=document.createElement('table');
  const hr=tb.insertRow();t.head.concat(['']).forEach(h=>{const c=document.createElement('th');c.textContent=h;hr.appendChild(c)});
@@ -445,13 +447,17 @@ async function qsend(text,shown){
   if(j.error){w.textContent=j.error;if(j.error.indexOf('รหัสผ่าน')>-1)sessionStorage.removeItem('pass');return}
   const r=j.result;qstate=r.state||{items:[]};w.textContent=r.reply;
   if(r.table){w.classList.add('qwide');qtable(r.table,w)}
-  if(r.buttons){const bar=document.createElement('div');bar.className='qact';r.buttons.forEach(b=>bar.appendChild(qbtn(b.label,()=>qsend(b.send,b.label))));w.appendChild(bar)}
+  if(r.buttons){const bar=document.createElement('div');bar.className='qact';r.buttons.forEach(b=>bar.appendChild(qbtn(b.label,()=>qsend(b.send,b.label),b.cls)));w.appendChild(bar)}
   if(r.saved){try{lastImg=await buildImage(r.saved);$('reopen').classList.remove('hide');showImg()}
    catch(e){w.appendChild(document.createTextNode('\n(สร้างรูปสรุปไม่ได้: '+e.message+')'))}}
  }catch(e){w.textContent='เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'}
  finally{qbusy=false;qlog.scrollTop=qlog.scrollHeight}
 }
-qadd('สวัสดีครับ ผมช่วยคิดราคาพิเศษ เริ่มจากบอกข้อมูลลูกค้าก่อนนะครับ (ตอบรวดเดียวได้)\n• รหัสลูกค้า (ใช้เฉพาะรหัส ไม่ต้องพิมพ์ชื่อลูกค้า)\n• ยอดซื้อสะสมปัจจุบัน (บาท)\n• ประเภทลูกค้า (เงินสด / เครดิต)\n• มีหน้างานต่อเนื่องไหม (ใช่ / ไม่ใช่)\n\nไม่ใช้ AI ก็ได้ กรอกฟอร์มด้านล่างได้เลย พิมพ์ "เริ่มใหม่" เพื่อล้างข้อมูลเมื่อไหร่ก็ได้');
+{const g=qadd('สวัสดีครับ เลือกได้เลย หรือพิมพ์ถามตรงๆ ก็ได้\n\n• ถามราคา/ต้นทุน เช่น ต้นทุนขนส่ง 40 กม., ราคาคู่แข่งของรหัสสินค้า, ส่งเองหรือโรงงานส่งถูกกว่า\n• ทำใบขอราคาพิเศษ ระบบจะถามข้อมูลลูกค้ากับสินค้า แล้วทำรูปสรุปให้\n\nไม่ใช้ AI ก็ได้ กรอกฟอร์มด้านล่างได้เลย พิมพ์ "เริ่มใหม่" เพื่อล้างข้อมูลเมื่อไหร่ก็ได้');
+const bar=document.createElement('div');bar.className='qact';
+bar.appendChild(qbtn('ถามราคา/ต้นทุน',()=>{qadd('ถามได้เลยครับ เช่น\n• ต้นทุนขนส่ง 40 กม.\n• รหัส 140402 ราคาเท่าไหร่ คู่แข่งเท่าไหร่\n• ส่งเอง 40 กม. กับโรงงานส่ง แบบไหนถูกกว่า\n• ขาย 60 ทุน 45 จำนวน 200 ส่งเอง 30 กม. 2 รอบ กำไรเท่าไหร่')}));
+bar.appendChild(qbtn('ทำใบขอราคาพิเศษ',()=>qsend('ทำใบขอราคาพิเศษ','ทำใบขอราคาพิเศษ'),'green'));
+g.appendChild(bar)}
 document.getElementById('qsend').onclick=()=>qsend();
 qin.addEventListener('keydown',e=>{if(e.key==='Enter')qsend()});
 </script>
