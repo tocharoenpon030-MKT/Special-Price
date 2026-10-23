@@ -98,7 +98,7 @@ table.sum tr.big td{font-size:20px;border-bottom:0}
  <label for="code">รหัสลูกค้า</label><input id="code" autocomplete="off" autocapitalize="characters">
  <div class="two">
   <div><label for="ctype">ประเภทลูกค้า</label><select id="ctype"></select></div>
-  <div><label for="cont">หน้างานต่อเนื่อง</label><select id="cont"></select></div>
+  <div><label for="cont">หน้างานนี้จะสั่งของต่อไหม</label><select id="cont"></select></div>
  </div>
  <label for="cum">ยอดซื้อสะสม (บาท)</label><input id="cum" type="number" inputmode="decimal" step="any">
  <div id="stats" class="box info hide"></div>
@@ -117,7 +117,7 @@ table.sum tr.big td{font-size:20px;border-bottom:0}
  <h2>ใบเสนอราคา</h2>
  <label for="seller">ชื่อเซล</label><input id="seller" autocomplete="name">
  <label for="quoteNo">เลขที่ใบเสนอราคา</label><input id="quoteNo" autocomplete="off">
- <label for="wh">สินค้าจากคลัง</label><select id="wh"></select>
+ <label for="wh">สินค้าจากคลัง(กรุงเทพหรือพัทยา)</label><select id="wh"></select>
  <div id="items"></div>
  <button type="button" id="add" class="full">+ เพิ่มรายการสินค้า</button>
  <label for="trips">จำนวนที่แจ้งขนส่งกี่รอบ</label><input id="trips" type="number" inputmode="numeric" min="1" step="1" value="1">
@@ -186,8 +186,8 @@ function condOk(t,c){
  return false;
 }
 function evaluate(c){
- for(const r of rules){if(r.conds.every(t=>condOk(t,c)))return {text:`${r.result} (${r.name})`,ok:r.result.indexOf('ส่งพิจารณา')<0}}
- return {text:'ไม่เข้าเกณฑ์ ส่งพิจารณา',ok:false};
+ for(const r of rules){if(r.conds.every(t=>condOk(t,c)))return {text:`${r.result} (${r.name})`,ok:r.result.indexOf('อนุมัติ')<0}}
+ return {text:'ขอพิจารณาเพิ่มเติม',ok:false};
 }
 
 /* ---- รายการสินค้า ---- */
