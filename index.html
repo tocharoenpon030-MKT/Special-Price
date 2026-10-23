@@ -73,6 +73,14 @@ table.sum tr.big td{font-size:20px;border-bottom:0}
 .qtw button{min-height:38px;padding:4px 10px;margin:0;font-size:15px;white-space:nowrap}
 .qfoot{margin-top:8px;font-size:15px;color:var(--mute);white-space:pre-wrap}
 .qact{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}.qact button{min-height:44px;margin:0}
+#qsec{--qbg:#fff3e4;--qline:#f1c798;--qacc:#f6a85c;--qink:#3b2200;background:var(--qbg);border-color:var(--qline)}
+@media(prefers-color-scheme:dark){#qsec{--qbg:#33261a;--qline:#6a4a2c;--qacc:#e9a35f;--qink:#2b1800}}
+#qsec #qlog,#qsec #qin{border-color:var(--qline)}
+#qsec .qb{background:var(--card);border-color:var(--qline)}
+#qsec .qu{background:var(--qacc);color:var(--qink)}
+#qsec #qsend,#qsec .qtw button,#qsec .qact button{background:var(--qacc);color:var(--qink);border-color:var(--qacc)}
+#qsec .qtw th{background:var(--qbg);white-space:pre-line;max-width:120px;font-weight:600}
+#qsec .qtw th,#qsec .qtw td{border-color:var(--qline)}
 </style></head><body>
 <header><h1>ขอราคาพิเศษ</h1><a class="data" id="dataLink" href="#" target="_blank" rel="noopener">DATA</a></header>
 <main>
@@ -140,7 +148,7 @@ table.sum tr.big td{font-size:20px;border-bottom:0}
 </div>
 
 <script>
-const API='https://script.google.com/macros/s/AKfycbxN-yPNMq3Q3kw2rCDwvvCyYTu-UI0b3A79C82uKJH0BTdSfvEEaL7fHsM8dMuOmvP3eA/exec';
+const API='https://script.google.com/macros/s/AKfycbzsOvSrei5o48au0M5sLrjVSWz_OpUEJrk9Nc2RFm-LoDa3sTq67BWR7h9Y6wJ4y2mcvw/exec';
 const $=id=>document.getElementById(id);
 const num=v=>{const x=parseFloat(String(v==null?'':v).replace(/,/g,''));return isNaN(x)?0:x};
 const fmt=x=>Number(x||0).toLocaleString('th-TH',{maximumFractionDigits:2});
@@ -412,7 +420,7 @@ function resetForm(){
 })();
 </script><!-- ===== ผู้ช่วย AI (สคริปต์) ===== -->
 <script>
-const QAPI='https://script.google.com/macros/s/AKfycbxN-yPNMq3Q3kw2rCDwvvCyYTu-UI0b3A79C82uKJH0BTdSfvEEaL7fHsM8dMuOmvP3eA/exec';
+const QAPI='https://script.google.com/macros/s/AKfycbzsOvSrei5o48au0M5sLrjVSWz_OpUEJrk9Nc2RFm-LoDa3sTq67BWR7h9Y6wJ4y2mcvw/exec';
 let qstate={items:[]},qbusy=false;
 const qlog=document.getElementById('qlog'),qin=document.getElementById('qin');
 const qpass=()=>{let p=sessionStorage.getItem('pass');if(!p){p=prompt('รหัสผ่านทีมขาย')||'';if(p)sessionStorage.setItem('pass',p)}return p};
