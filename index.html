@@ -84,6 +84,26 @@ table.sum tr.big td{font-size:20px;border-bottom:0}
 #qsec .qact button.green{background:#62c98a;border-color:#62c98a;color:#072a15;font-weight:600}
 @media(prefers-color-scheme:dark){#qsec .qact button.green{background:#6fd39a;border-color:#6fd39a;color:#0b2616}}
 #qsec .qtw td{white-space:pre-line}
+#qlog{height:clamp(320px,62vh,620px);height:clamp(320px,62dvh,620px)}
+#qin{font-size:16px}
+@media(max-width:600px){header{padding:12px 12px 6px}main{padding:8px 10px}#qsec{padding:12px}.qm{max-width:97%}}
+@media(min-width:760px){header,main{max-width:860px}}
+@media(min-width:1040px){
+ header,main{max-width:1380px}
+ main{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(380px,1fr);gap:18px;align-items:start}
+ #qsec{position:sticky;top:12px;margin:0;display:flex;flex-direction:column;height:calc(100vh - 150px);min-height:460px}
+ #qsec #qlog{flex:1;height:auto;min-height:0}
+ #formcol{min-width:0}
+ .bar>div{max-width:1380px}
+ .qm{font-size:17px}
+}
+#qsec .qtw input.qin2{width:100px;min-height:40px;padding:4px 8px;font-size:16px;text-align:right;margin:0}
+#qsec .qsm{font-size:13px;color:var(--mute);white-space:pre-line;margin-top:2px;text-align:right}
+#qsec .qsm.w{color:var(--bad)}
+#qsec .qcalc{margin-top:8px;font-size:16px;white-space:pre-line;font-weight:600}
+#qsec .qcalc.ok{color:var(--ok)}#qsec .qcalc.bad{color:var(--bad)}
+#qsec .qtw tr.cust td{background:var(--qbg)}
+#qsec button:disabled{opacity:.45;cursor:not-allowed}
 </style></head><body>
 <header><h1>ขอราคาพิเศษ</h1><a class="data" id="dataLink" href="#" target="_blank" rel="noopener">DATA</a></header>
 <main>
@@ -93,6 +113,7 @@ table.sum tr.big td{font-size:20px;border-bottom:0}
  <div id="qlog"></div>
  <div id="qbar"><input id="qin" placeholder="พิมพ์ข้อมูลหรือคำตอบที่นี่..." autocomplete="off"><button id="qsend" type="button">ส่ง</button></div>
 </section>
+<div id="formcol">
 
 <section>
  <h2>ลูกค้า</h2>
@@ -131,6 +152,7 @@ table.sum tr.big td{font-size:20px;border-bottom:0}
  <table class="sum" id="sum"></table>
 </section>
 
+</div>
 </main>
 
 <div class="bar"><div>
@@ -151,7 +173,7 @@ table.sum tr.big td{font-size:20px;border-bottom:0}
 </div>
 
 <script>
-const API='https://script.google.com/macros/s/AKfycbwHbLlzCccHbkDx8e9KUWEZL98g17PFHOY2KbH7hg_nXh0yABNoo_PB1Ff4puxEt6YBJQ/exec';
+const API='https://script.google.com/macros/s/AKfycbzbH4qhgERcx9Huk1bNOp94cnPDo3V8oPWtmsdDckb6o4UrCLq785Fp7tQNr83jSVsxeQ/exec';
 const $=id=>document.getElementById(id);
 const num=v=>{const x=parseFloat(String(v==null?'':v).replace(/,/g,''));return isNaN(x)?0:x};
 const fmt=x=>Number(x||0).toLocaleString('th-TH',{maximumFractionDigits:2});
@@ -424,13 +446,40 @@ function resetForm(){
 })();
 </script><!-- ===== ผู้ช่วย AI (สคริปต์) ===== -->
 <script>
-const QAPI='https://script.google.com/macros/s/AKfycbwHbLlzCccHbkDx8e9KUWEZL98g17PFHOY2KbH7hg_nXh0yABNoo_PB1Ff4puxEt6YBJQ/exec',QKEY='qchat_v1',QSELLER='qseller',QTTL=12*3600*1000;
+const QAPI='https://script.google.com/macros/s/AKfycbzbH4qhgERcx9Huk1bNOp94cnPDo3V8oPWtmsdDckb6o4UrCLq785Fp7tQNr83jSVsxeQ/exec',QKEY='qchat_v1',QSELLER='qseller',QTTL=12*3600*1000;
 let qstate={items:[]},qbusy=false,qlogData=[];
 const qlog=document.getElementById('qlog'),qin=document.getElementById('qin');
 const qls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 const qpass=()=>{let p=sessionStorage.getItem('pass');if(!p){p=prompt('รหัสผ่านทีมขาย')||'';if(p)sessionStorage.setItem('pass',p)}return p};
 function qsave(){qls.set(QKEY,JSON.stringify({t:Date.now(),state:qstate,log:qlogData.slice(-40)}))}
 function qbtn(label,fn,cls){const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=fn;if(cls)b.className=cls;return b}
+function qcustom(t,tb){ // แถว "ใส่เอง": เซลพิมพ์ราคา แล้วเห็นกำไรทันที (คำนวณในหน้านี้ ไม่เรียก AI)
+ const cu=t.custom,fmt=n=>Number(n).toLocaleString('th-TH',{maximumFractionDigits:2}),rd=n=>Math.round(n*100)/100;
+ const tr=tb.insertRow();tr.className='cust';const c0=tr.insertCell();c0.textContent='ใส่เอง';c0.className='l';
+ const ins=[],sms=[];
+ cu.cols.forEach(c=>{const td=tr.insertCell(),inp=document.createElement('input'),sm=document.createElement('div');
+  inp.type='number';inp.step='0.01';inp.min='0';inp.setAttribute('inputmode','decimal');inp.placeholder='ราคา';inp.className='qin2';inp.setAttribute('aria-label','ราคาขาย '+c.code);
+  sm.className='qsm';td.appendChild(inp);td.appendChild(sm);ins.push(inp);sms.push(sm)});
+ const pc=tr.insertCell();pc.textContent='-';
+ const go=qbtn('ขายราคานี้',()=>qsend('ใช้ราคา '+cu.cols.map((c,k)=>c.code+'='+parseFloat(ins[k].value)).join(' '),'ขายราคานี้ (ใส่เอง)'));go.disabled=true;tr.insertCell().appendChild(go);
+ const note=document.createElement('div');note.className='qcalc';
+ const recalc=()=>{
+  const ps=ins.map(i=>parseFloat(i.value));let gross=cu.fixedG;
+  cu.cols.forEach((c,k)=>{const p=ps[k],sm=sms[k];
+   if(!(p>0)){sm.textContent='';sm.classList.remove('w');return}
+   gross+=(p-c.cost)*c.qty;const wr=[];
+   if(p<c.cost)wr.push('⚠ ต่ำกว่าต้นทุน');else if(p<c.floor)wr.push('⚠ ต่ำกว่าต้นทุน+'+fmt(cu.pct)+'%');
+   if(c.comp>0&&p>c.comp)wr.push('⚠ แพงกว่าคู่แข่ง');
+   if(c.mkt>0&&p>c.mkt)wr.push('⚠ แพงกว่าตลาด');
+   sm.textContent='+'+fmt(Math.round((p/c.cost-1)*1000)/10)+'%'+(wr.length?'\n'+wr.join('\n'):'');sm.classList.toggle('w',wr.length>0)});
+  const okAll=ps.every(p=>p>0);go.disabled=!okAll;
+  if(!okAll){pc.textContent='-';note.className='qcalc';note.textContent=ps.some(p=>p>0)?'ใส่ราคาให้ครบทุกช่อง':'';return}
+  const per=gross/cu.trips-cu.ship;pc.textContent=fmt(rd(per));
+  let txt='กำไรต่อเที่ยว '+fmt(rd(per))+' บาท | กำไรทั้งหมด '+fmt(rd(per*cu.trips))+' บาท ('+fmt(cu.trips)+' รอบ)',cls='qcalc';
+  if(cu.min>0){if(per>=cu.min){txt+='\n✅ ถึงเกณฑ์กำไร '+fmt(cu.min)+' บาท/เที่ยว';cls+=' ok'}else{txt+='\n❌ ต่ำกว่าเกณฑ์ '+fmt(cu.min)+' ขาดอีก '+fmt(rd(cu.min-per))+' บาท/เที่ยว';cls+=' bad'}}
+  note.className=cls;note.textContent=txt};
+ ins.forEach(i=>i.addEventListener('input',recalc));return note;
+}
 function qtable(t,box){
  const w=document.createElement('div');w.className='qtw';const tb=document.createElement('table');
  const hr=tb.insertRow();(t.simple?t.head:t.head.concat([''])).forEach(x=>{const c=document.createElement('th');c.textContent=x;hr.appendChild(c)});
@@ -439,6 +488,7 @@ function qtable(t,box){
   if(!t.simple){tr.insertCell().textContent=r.profit;
    tr.insertCell().appendChild(qbtn('ขายราคานี้',()=>qsend('เลือกขั้น '+r.n,'ขายราคานี้ ('+r.label.replace('⭐ ','')+')')))}});
  w.appendChild(tb);box.appendChild(w);
+ if(t.custom&&!t.simple)box.appendChild(qcustom(t,tb));
  if(t.foot){const f=document.createElement('div');f.className='qfoot';f.textContent=t.foot.join('\n');box.appendChild(f)}
 }
 function qbubble(e){
