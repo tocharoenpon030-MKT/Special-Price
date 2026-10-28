@@ -118,6 +118,13 @@ table.sum tr.big td{font-size:20px;border-bottom:0}
 .qchl{font-size:15px;color:var(--mute)}
 #qsec .qopt{background:var(--card);color:var(--ink);border:2px solid var(--qacc);min-height:44px;margin:0;font-weight:600}
 #qsec .qopt:disabled{opacity:.4}
+#qtools{display:flex;gap:8px;margin-top:8px}
+#qsec #qtools button{min-height:40px;margin:0;padding:4px 14px;font-size:15px;background:var(--card);color:var(--ink);border:2px solid var(--qline)}
+#qsec .qopt.sel{background:var(--qacc);color:var(--qink);border-color:var(--qacc)}
+#qsec .qopt.qok{border-style:dashed}
+#qsec .cl-min{color:#1d5fa8;font-weight:600}#qsec .cl-comp{color:#c2410c;font-weight:600}#qsec .cl-mkt{color:#7c3aed;font-weight:600}#qsec .cl-our{font-weight:700}
+#qsec .cl-warn,#qsec .cl-bad{color:var(--bad)}#qsec .cl-ok{color:var(--ok)}
+@media(prefers-color-scheme:dark){#qsec .cl-min{color:#8cc4ff}#qsec .cl-comp{color:#ffab76}#qsec .cl-mkt{color:#c4a7ff}}
 </style></head><body>
 <header><h1>ขอราคาพิเศษ</h1><a class="data" id="dataLink" href="#" target="_blank" rel="noopener">DATA</a></header>
 <main>
@@ -125,6 +132,7 @@ table.sum tr.big td{font-size:20px;border-bottom:0}
  <div class="qhead"><h2>ผู้ช่วย AI</h2><button id="qwide" type="button" class="qtog">ขยายเต็มจอ ⤢</button></div>
  <p class="qhint">พิมพ์คุยกับ AI ให้ช่วยคิดราคา หรือจะกรอกฟอร์มด้านล่างเองเลยก็ได้</p>
  <div id="qlog"></div>
+ <div id="qtools"><button id="qback" type="button">↩ ย้อนกลับ</button><button id="qreset" type="button">⟲ เริ่มใหม่</button></div>
  <div id="qbar"><input id="qin" placeholder="พิมพ์ข้อมูลหรือคำตอบที่นี่..." autocomplete="off"><button id="qsend" type="button">ส่ง</button></div>
 </section>
 <div id="formcol">
@@ -187,7 +195,7 @@ table.sum tr.big td{font-size:20px;border-bottom:0}
 </div>
 
 <script>
-const API='https://script.google.com/macros/s/AKfycbzG3DOTEqdLwnnNYkcUrzlbomYuL7BC8pnZZtJU-Ws2JlR8GCP7iB3j4csYEfovZq-8pw/exec';
+const API='https://script.google.com/macros/s/AKfycbzbH4qhgERcx9Huk1bNOp94cnPDo3V8oPWtmsdDckb6o4UrCLq785Fp7tQNr83jSVsxeQ/exec';
 const $=id=>document.getElementById(id);
 const num=v=>{const x=parseFloat(String(v==null?'':v).replace(/,/g,''));return isNaN(x)?0:x};
 const fmt=x=>Number(x||0).toLocaleString('th-TH',{maximumFractionDigits:2});
@@ -460,12 +468,12 @@ function resetForm(){
 })();
 </script><!-- ===== ผู้ช่วย AI (สคริปต์) ===== -->
 <script>
-const QAPI='https://script.google.com/macros/s/AKfycbzG3DOTEqdLwnnNYkcUrzlbomYuL7BC8pnZZtJU-Ws2JlR8GCP7iB3j4csYEfovZq-8pw/exec',QKEY='qchat_v1',QSELLER='qseller',QTTL=12*3600*1000;
-let qstate={items:[]},qbusy=false,qlogData=[];
+const QAPI='https://script.google.com/macros/s/AKfycbzbH4qhgERcx9Huk1bNOp94cnPDo3V8oPWtmsdDckb6o4UrCLq785Fp7tQNr83jSVsxeQ/exec',QKEY='qchat_v1',QSELLER='qseller',QTTL=12*3600*1000;
+let qstate={items:[]},qbusy=false,qlogData=[],qhist=[];
 const qlog=document.getElementById('qlog'),qin=document.getElementById('qin');
 const qls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 const qpass=()=>{let p=sessionStorage.getItem('pass');if(!p){p=prompt('รหัสผ่านทีมขาย')||'';if(p)sessionStorage.setItem('pass',p)}return p};
-function qsave(){qls.set(QKEY,JSON.stringify({t:Date.now(),state:qstate,log:qlogData.slice(-40)}))}
+function qsave(){qls.set(QKEY,JSON.stringify({t:Date.now(),state:qstate,log:qlogData.slice(-200),hist:qhist.slice(-20)}))}
 function qbtn(label,fn,cls){const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=fn;if(cls)b.className=cls;return b}
 function qcustom(t,tb){ // แถว "ใส่เอง": เซลพิมพ์ราคา แล้วเห็นกำไรทันที (คำนวณในหน้านี้ ไม่เรียก AI)
  const cu=t.custom,fmt=n=>Number(n).toLocaleString('th-TH',{maximumFractionDigits:2}),rd=n=>Math.round(n*100)/100;
@@ -505,33 +513,58 @@ function qtable(t,box){
  if(t.custom&&!t.simple)box.appendChild(qcustom(t,tb));
  if(t.foot){const f=document.createElement('div');f.className='qfoot';f.textContent=t.foot.join('\n');box.appendChild(f)}
 }
+function qrich(el,text){ // ระบายสี ราคาขายต่ำสุด/คู่แข่ง/ตลาด/เรา และบรรทัดเตือน
+ const re=/(ราคาขายต่ำสุด|คู่แข่ง|ตลาด|เรา)\s[\d,.]+|⚠[^\n]*|✅[^\n]*|❌[^\n]*/g;let last=0,m;
+ const cls=s=>s.indexOf('ราคาขายต่ำสุด')===0?'cl-min':s.indexOf('คู่แข่ง')===0?'cl-comp':s.indexOf('ตลาด')===0?'cl-mkt':s.indexOf('เรา')===0?'cl-our':s[0]==='⚠'?'cl-warn':s[0]==='✅'?'cl-ok':'cl-bad';
+ while((m=re.exec(text))){if(m.index>last)el.appendChild(document.createTextNode(text.slice(last,m.index)));
+  const sp=document.createElement('span');sp.className=cls(m[0]);sp.textContent=m[0];el.appendChild(sp);last=m.index+m[0].length}
+ if(last<text.length)el.appendChild(document.createTextNode(text.slice(last)));
+}
 function qbubble(e){
- const d=document.createElement('div');d.className='qm '+(e.me?'qu':'qb');d.textContent=e.text;
+ const d=document.createElement('div');d.className='qm '+(e.me?'qu':'qb');
+ if(e.me)d.textContent=e.text;else qrich(d,e.text);
  if(e.table){d.classList.add('qwide');qtable(e.table,d)}
- if(e.choices){e.choices.forEach(g=>{const row=document.createElement('div');row.className='qch';const lb=document.createElement('span');lb.className='qchl';lb.textContent=g.title+':';row.appendChild(lb);
-  g.options.forEach(o=>{const lab=typeof o==='string'?o:o.label,snd=typeof o==='string'?o:o.send;
-   row.appendChild(qbtn(lab,function(){d.querySelectorAll('.qch button').forEach(x=>{x.disabled=true});qsend(snd,lab)},'qopt'))});d.appendChild(row)})}
+ if(e.choices){
+  const multi=e.choices.filter(g=>g.options.length>1),grp=multi.length>=2,sel={};let okb=null;
+  const lock=()=>d.querySelectorAll('.qch button').forEach(x=>{x.disabled=true});
+  const sendSel=()=>{const ps=multi.map(g=>sel[g.title]).filter(Boolean);if(!ps.length)return;lock();qsend(ps.map(p=>p.snd).join(' | '),ps.map(p=>p.lab).join(' + '))};
+  e.choices.forEach(g=>{const row=document.createElement('div');row.className='qch';const lb=document.createElement('span');lb.className='qchl';lb.textContent=g.title+':';row.appendChild(lb);
+   g.options.forEach(o=>{const lab=typeof o==='string'?o:o.label,snd=typeof o==='string'?o:o.send;
+    const b=qbtn(lab,function(){
+     if(grp&&g.options.length>1){sel[g.title]={lab,snd};row.querySelectorAll('button').forEach(x=>x.classList.toggle('sel',x===b));if(okb)okb.disabled=false;if(multi.every(x=>sel[x.title]))sendSel()}
+     else{lock();qsend(snd,lab)}},'qopt');row.appendChild(b)});d.appendChild(row)});
+  if(grp){okb=qbtn('ตกลง (ส่งที่เลือก)',sendSel,'qopt qok');okb.disabled=true;const r2=document.createElement('div');r2.className='qch';r2.appendChild(okb);d.appendChild(r2)}
+ }
  if(e.buttons){const bar=document.createElement('div');bar.className='qact';e.buttons.forEach(b=>bar.appendChild(b.copy?qbtn(b.label,function(){qcopy(b.copy,this)}):qbtn(b.label,()=>qsend(b.send,b.label),b.cls)));d.appendChild(bar)}
  qlog.appendChild(d);qlog.scrollTop=qlog.scrollHeight;return d;
 }
 function qcopyOld(t,done){const a=document.createElement('textarea');a.value=t;a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);a.select();try{document.execCommand('copy');done()}catch(e){alert('คัดลอกไม่ได้ ลองกดค้างที่ข้อความ')}a.remove()}
 function qcopy(t,btn){const o=btn.textContent,done=()=>{btn.textContent='คัดลอกแล้ว ✓';setTimeout(()=>{btn.textContent=o},2000)};
  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(done,()=>qcopyOld(t,done))}else qcopyOld(t,done)}
+function qrender(){qlog.innerHTML='';const L=qlogData.slice();qlogData=[];
+ if(!L.length){qgreet();return}
+ L.forEach((e,i)=>{const x=Object.assign({},e);if(i<L.length-1)x.choices=null;qpush(x)})}
+function qback(){if(qbusy)return;
+ if(!qhist.length){qbubble({text:'ไม่มีขั้นก่อนหน้าแล้วครับ'});return}
+ const sn=qhist.pop();qstate=sn.state;qlogData=qlogData.slice(0,sn.log);qrender();qsave()}
+function qreset(){if(qbusy)return;if(qlogData.length>1&&!confirm('ล้างข้อมูลทั้งหมดแล้วเริ่มใหม่?'))return;
+ qstate={items:[]};qlogData=[];qhist=[];qls.del(QKEY);qrender()}
 function qpush(e){qlogData.push(e);return qbubble(e)}
 async function qsend(text,shown){
  if(qbusy)return;
  const m=(text!==undefined?text:qin.value).trim();if(!m)return;
  if(text===undefined)qin.value='';
+ const snap={state:JSON.parse(JSON.stringify(qstate)),log:qlogData.length};
  qpush({me:true,text:shown||m});
  const w=qbubble({text:'กำลังคิด... (รอสักครู่)'});qbusy=true;
  try{
   const j=await (await fetch(QAPI,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn:'chat',args:[m,qstate,qls.get(QSELLER)||''],pass:qpass()})})).json();
   w.remove();
   if(j.error){qpush({me:false,text:j.error});if(j.error.indexOf('รหัสผ่าน')>-1)sessionStorage.removeItem('pass');return}
-  const r=j.result;qstate=r.state||{items:[]};
+  const r=j.result;qstate=r.state||{items:[]};qhist.push(snap);if(qhist.length>30)qhist.shift();
   if(qstate.seller)qls.set(QSELLER,qstate.seller);
   const e={me:false,text:r.reply,table:r.table,buttons:r.buttons,choices:r.choices};qpush(e);
-  if(r.saved||m==='เริ่มใหม่'||m==='ยกเลิก')qlogData=[e];
+  if(r.saved||m==='เริ่มใหม่'||m==='ยกเลิก'){qlogData=[e];qhist=[]}
   qsave();
   if(r.saved){try{lastImg=await buildImage(r.saved);$('reopen').classList.remove('hide');showImg()}
    catch(err){qbubble({text:'(สร้างรูปสรุปไม่ได้: '+err.message+')'})}}
@@ -548,14 +581,16 @@ function qgreet(){
 (function(){ // กู้คืนบทสนทนาเมื่อรีเฟรชหน้า (เก็บในเครื่องนี้เท่านั้น นาน 12 ชั่วโมง)
  const raw=qls.get(QKEY);
  if(raw){try{const d=JSON.parse(raw);
-  if(Date.now()-d.t<QTTL&&d.log&&d.log.length){qstate=d.state||{items:[]};qlogData=[];d.log.forEach((e,i)=>{if(i<d.log.length-1)e.choices=null;qpush(e)});
-   qbubble({text:'(กู้คืนบทสนทนาเดิมแล้ว พิมพ์ "เริ่มใหม่" ถ้าต้องการล้าง)'});return}}catch(e){}}
+  if(Date.now()-d.t<QTTL&&d.log&&d.log.length){qstate=d.state||{items:[]};qhist=d.hist||[];qlogData=d.log;qrender();
+   qbubble({text:'(กู้คืนบทสนทนาเดิมแล้ว กด "เริ่มใหม่" ถ้าต้องการล้าง)'});return}}catch(e){}}
  qgreet();
 })();
 (function(){const b=document.getElementById('qwide'),m=document.querySelector('main');if(!b||!m)return;
  const set=on=>{m.classList.toggle('qfull',on);b.textContent=on?'ย่อกลับ ⤡':'ขยายเต็มจอ ⤢';qls.set('qfull',on?'1':'0')};
  b.onclick=()=>set(!m.classList.contains('qfull'));set(qls.get('qfull')==='1')})();
 document.getElementById('qsend').onclick=()=>qsend();
+document.getElementById('qback').onclick=qback;
+document.getElementById('qreset').onclick=qreset;
 qin.addEventListener('keydown',e=>{if(e.key==='Enter')qsend()});
 </script>
 </body></html>
