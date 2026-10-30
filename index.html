@@ -232,7 +232,7 @@ function condOk(t,c){
 }
 function evaluate(c){
  for(const r of rules){if(r.conds.every(t=>condOk(t,c)))return {text:`${r.result} (${r.name})`,ok:r.result.indexOf('ส่งพิจารณา')<0}}
- return {text:'ไม่เข้าเกณฑ์ ส่งพิจารณา',ok:false};
+ return {text:'ส่งพิจารณาเพิ่มเติมใน Line',ok:false};
 }
 
 /* ---- รายการสินค้า ---- */
