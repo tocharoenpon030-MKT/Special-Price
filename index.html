@@ -125,6 +125,15 @@ table.sum tr.big td{font-size:20px;border-bottom:0}
 #qsec .cl-min{color:#1d5fa8;font-weight:600}#qsec .cl-comp{color:#c2410c;font-weight:600}#qsec .cl-mkt{color:#7c3aed;font-weight:600}#qsec .cl-our{font-weight:700}
 #qsec .cl-warn,#qsec .cl-bad{color:var(--bad)}#qsec .cl-ok{color:var(--ok)}
 @media(prefers-color-scheme:dark){#qsec .cl-min{color:#8cc4ff}#qsec .cl-comp{color:#ffab76}#qsec .cl-mkt{color:#c4a7ff}}
+#qsec[data-mode="quote"]{--qbg:#eaf8f0;--qline:#b5e3c9;--qacc:#62c98a;--qink:#072a15}
+#qsec[data-mode="free"]{--qbg:#eaf3fd;--qline:#b9d6f5;--qacc:#7db8f2;--qink:#0b2a4a}
+@media(prefers-color-scheme:dark){
+ #qsec[data-mode="quote"]{--qbg:#16301f;--qline:#2f5a3e;--qacc:#6fd39a;--qink:#0b2616}
+ #qsec[data-mode="free"]{--qbg:#162a3d;--qline:#2f4f72;--qacc:#7db8f2;--qink:#06213a}
+}
+#qsec .qact button.mbtn-ask{background:#f6a85c;border-color:#f6a85c;color:#3b2200;font-weight:600}
+#qsec .qact button.mbtn-free{background:#7db8f2;border-color:#7db8f2;color:#0b2a4a;font-weight:600}
+#qsec .qact button.accent{background:var(--qacc);border-color:var(--qacc);color:var(--qink);font-weight:600}
 </style></head><body>
 <header><h1>ขอราคาพิเศษ</h1><a class="data" id="dataLink" href="#" target="_blank" rel="noopener">DATA</a></header>
 <main>
@@ -195,7 +204,7 @@ table.sum tr.big td{font-size:20px;border-bottom:0}
 </div>
 
 <script>
-const API='https://script.google.com/macros/s/AKfycbwGl_c3y9GNFOayiKoLGm7L-nS3kOaZtfkyUgG4l5M95JsnMsaZHlRRsnUX1TMriZrDWQ/exec';
+const API='https://script.google.com/macros/s/AKfycbzbH4qhgERcx9Huk1bNOp94cnPDo3V8oPWtmsdDckb6o4UrCLq785Fp7tQNr83jSVsxeQ/exec';
 const $=id=>document.getElementById(id);
 const num=v=>{const x=parseFloat(String(v==null?'':v).replace(/,/g,''));return isNaN(x)?0:x};
 const fmt=x=>Number(x||0).toLocaleString('th-TH',{maximumFractionDigits:2});
@@ -232,7 +241,7 @@ function condOk(t,c){
 }
 function evaluate(c){
  for(const r of rules){if(r.conds.every(t=>condOk(t,c)))return {text:`${r.result} (${r.name})`,ok:r.result.indexOf('ส่งพิจารณา')<0}}
- return {text:'ส่งพิจารณาเพิ่มเติมใน Line',ok:false};
+ return {text:'ไม่เข้าเกณฑ์ ส่งพิจารณา',ok:false};
 }
 
 /* ---- รายการสินค้า ---- */
@@ -402,6 +411,44 @@ async function buildImage(s){
  const blob=await new Promise(ok=>c.toBlob(ok,'image/png'));
  return {url:c.toDataURL('image/png'),blob,name:`สรุปขอราคาพิเศษ_${s.quoteNo}.png`};
 }
+
+function drawFree(x,W,s){
+ const P=36,F="'Sarabun','Noto Sans Thai',system-ui,sans-serif";
+ const T=(t,X,Y,o={})=>{let sz=o.s||30;const w=o.w||400;x.textBaseline='alphabetic';x.textAlign=o.a||'left';x.fillStyle=o.c||'#14212b';
+  x.font=`${w} ${sz}px ${F}`;if(o.max){while(x.measureText(String(t)).width>o.max&&sz>16){sz-=1;x.font=`${w} ${sz}px ${F}`}}x.fillText(String(t),X,Y)};
+ const col=v=>v<0?'#a61b1b':'#146c3a';
+ x.fillStyle='#fff';x.fillRect(0,0,W,6000);
+ x.fillStyle='#1d5fa8';x.fillRect(0,0,W,150);
+ T('สรุปขอส่งฟรี',P,66,{s:50,w:700,c:'#fff'});
+ T(`วันที่ ${s.date}   เวลา ${s.time}`,P,118,{s:32,c:'#dbeafe'});
+ let y=176;
+ const ok=/^อนุมัติ/.test(s.result),vc=ok?'#146c3a':(s.matched?'#7a5200':'#a61b1b');
+ x.fillStyle=ok?'#dff5e8':(s.matched?'#fff1cf':'#fde4e4');rr(x,P,y,W-2*P,150,16);
+ T('ผลตามหลักเกณฑ์ส่งฟรี'+(s.grade?` (${s.grade})`:''),P+26,y+50,{s:30,c:vc,max:W-2*P-52});
+ T(s.result,P+26,y+114,{s:46,w:700,c:vc,max:W-2*P-52});
+ y+=186;
+ const sec=t=>{x.fillStyle='#e3f1f6';rr(x,P,y,W-2*P,56,12);T(t,P+22,y+39,{s:32,w:700,c:'#0b5d7a'});y+=78};
+ const half=(W-2*P)/2;
+ const kv=a=>{a.forEach((it,i)=>{const c=i%2,X=P+c*half;T(it[0],X,y+30,{s:27,c:'#52606d',max:half-16});T(it[1],X,y+76,{s:36,w:700,c:it[2]||'#14212b',max:half-16});if(c===1||i===a.length-1)y+=100})};
+ sec('ลูกค้า');kv([['รหัสลูกค้า',s.code],['ประเภทลูกค้า',s.type],['ยอดซื้อสะสม 3 เดือนล่าสุด (บาท)',fmt(s.cum)],['หน้างานต่อเนื่อง',s.cont]]);
+ sec('การส่ง');kv([['เลขที่ใบเสนอราคา',s.quote],['ชื่อเซล',s.seller],['ส่งตอนไหน',s.when],['ระยะทางไป+กลับ (กม.)',fmt(s.km)]]);
+ sec('กำไรและต้นทุน');kv([['กำไรเที่ยวนี้ (บาท)',fmt(s.profit),col(s.profit)],['ต้นทุนค่าขนส่ง (บาท)',fmt(s.ship)],['กำไร − ต้นทุนขนส่ง (บาท)',fmt(s.net),col(s.net)],['ส่งฟรีไปแล้วเดือนนี้ (ครั้ง)',`${fmt(s.count)} (ครั้งนี้เป็นครั้งที่ ${s.count+1})`]]);
+ sec('ผู้จัดการสาขา');kv([['อนุมัติหรือไม่',s.mgr,s.mgr==='อนุมัติ'?'#146c3a':'#a61b1b']]);
+ T('เหตุผล',P,y+30,{s:27,c:'#52606d'});y+=48;
+ x.font=`400 34px ${F}`;
+ const lines=[];let cur='';for(const ch of String(s.reason||'')){if(ch==='\n'||x.measureText(cur+ch).width>W-2*P){lines.push(cur);cur=ch==='\n'?'':ch}else cur+=ch}lines.push(cur);
+ lines.slice(0,6).forEach(l=>{T(l,P,y+34,{s:34});y+=48});
+ return y+P;
+}
+async function buildImageFree(s){
+ try{await Promise.all([document.fonts.load('400 24px Sarabun'),document.fonts.load('700 24px Sarabun')])}catch(e){}
+ const W=900,S=2,probe=document.createElement('canvas').getContext('2d');
+ const H=drawFree(probe,W,s),c=document.createElement('canvas');
+ c.width=W*S;c.height=H*S;const x=c.getContext('2d');x.scale(S,S);drawFree(x,W,s);
+ const blob=await new Promise(ok=>c.toBlob(ok,'image/png'));
+ return {url:c.toDataURL('image/png'),blob,name:`สรุปขอส่งฟรี_${s.quote}.png`,title:'สรุปขอส่งฟรี'};
+}
+
 function showImg(){
  if(!lastImg)return;
  $('pic').src=lastImg.url;$('dl').href=lastImg.url;$('dl').download=lastImg.name;
@@ -412,7 +459,7 @@ function showImg(){
 $('close').onclick=()=>$('modal').classList.add('hide');
 $('modal').addEventListener('click',e=>{if(e.target.id==='modal')$('modal').classList.add('hide')});
 $('reopen').onclick=showImg;
-$('share').onclick=async()=>{try{await navigator.share({files:[new File([lastImg.blob],lastImg.name,{type:'image/png'})],title:'สรุปขอราคาพิเศษ'})}catch(e){}};
+$('share').onclick=async()=>{try{await navigator.share({files:[new File([lastImg.blob],lastImg.name,{type:'image/png'})],title:lastImg.title||'สรุปขอราคาพิเศษ'})}catch(e){}};
 
 /* ---- บันทึก ---- */
 function payload(allowMissing){
@@ -468,7 +515,7 @@ function resetForm(){
 })();
 </script><!-- ===== ผู้ช่วย AI (สคริปต์) ===== -->
 <script>
-const QAPI='https://script.google.com/macros/s/AKfycbwGl_c3y9GNFOayiKoLGm7L-nS3kOaZtfkyUgG4l5M95JsnMsaZHlRRsnUX1TMriZrDWQ/exec',QKEY='qchat_v1',QSELLER='qseller',QTTL=12*3600*1000;
+const QAPI='https://script.google.com/macros/s/AKfycbzbH4qhgERcx9Huk1bNOp94cnPDo3V8oPWtmsdDckb6o4UrCLq785Fp7tQNr83jSVsxeQ/exec',QKEY='qchat_v1',QSELLER='qseller',QTTL=12*3600*1000;
 let qstate={items:[]},qbusy=false,qlogData=[],qhist=[];
 const qlog=document.getElementById('qlog'),qin=document.getElementById('qin');
 const qls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
@@ -541,7 +588,8 @@ function qbubble(e){
 function qcopyOld(t,done){const a=document.createElement('textarea');a.value=t;a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);a.select();try{document.execCommand('copy');done()}catch(e){alert('คัดลอกไม่ได้ ลองกดค้างที่ข้อความ')}a.remove()}
 function qcopy(t,btn){const o=btn.textContent,done=()=>{btn.textContent='คัดลอกแล้ว ✓';setTimeout(()=>{btn.textContent=o},2000)};
  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(done,()=>qcopyOld(t,done))}else qcopyOld(t,done)}
-function qrender(){qlog.innerHTML='';const L=qlogData.slice();qlogData=[];
+function qmode(){const m=qstate&&qstate.mode;document.getElementById('qsec').dataset.mode=(m==='quote'||m==='free')?m:'ask'}
+function qrender(){qmode();qlog.innerHTML='';const L=qlogData.slice();qlogData=[];
  if(!L.length){qgreet();return}
  L.forEach((e,i)=>{const x=Object.assign({},e);if(i<L.length-1)x.choices=null;qpush(x)})}
 function qback(){if(qbusy)return;
@@ -561,21 +609,22 @@ async function qsend(text,shown){
   const j=await (await fetch(QAPI,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn:'chat',args:[m,qstate,qls.get(QSELLER)||''],pass:qpass()})})).json();
   w.remove();
   if(j.error){qpush({me:false,text:j.error});if(j.error.indexOf('รหัสผ่าน')>-1)sessionStorage.removeItem('pass');return}
-  const r=j.result;qstate=r.state||{items:[]};qhist.push(snap);if(qhist.length>30)qhist.shift();
+  const r=j.result;qstate=r.state||{items:[]};qmode();qhist.push(snap);if(qhist.length>30)qhist.shift();
   if(qstate.seller)qls.set(QSELLER,qstate.seller);
   const e={me:false,text:r.reply,table:r.table,buttons:r.buttons,choices:r.choices};qpush(e);
   if(r.saved||m==='เริ่มใหม่'||m==='ยกเลิก'){qlogData=[e];qhist=[]}
   qsave();
-  if(r.saved){try{lastImg=await buildImage(r.saved);$('reopen').classList.remove('hide');showImg()}
+  if(r.saved){try{lastImg=await (r.saved.kind==='free'?buildImageFree(r.saved):buildImage(r.saved));$('reopen').classList.remove('hide');showImg()}
    catch(err){qbubble({text:'(สร้างรูปสรุปไม่ได้: '+err.message+')'})}}
  }catch(err){w.remove();qbubble({text:'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง'})}
  finally{qbusy=false;qlog.scrollTop=qlog.scrollHeight}
 }
 function qgreet(){
- const g=qbubble({text:'สวัสดีครับ เลือกได้เลย หรือพิมพ์ถามตรงๆ ก็ได้\n\n• ถามราคา/ต้นทุน เช่น ต้นทุนขนส่ง 40 กม., ราคาคู่แข่งของรหัสสินค้า, ส่งเองหรือโรงงานส่งถูกกว่า\n• ทำใบขอราคาพิเศษ ระบบจะถามข้อมูลลูกค้ากับสินค้า แล้วทำรูปสรุปให้\n\nไม่ใช้ AI ก็ได้ กรอกฟอร์มด้านล่างได้เลย พิมพ์ "เริ่มใหม่" เพื่อล้างข้อมูลเมื่อไหร่ก็ได้'});
+ const g=qbubble({text:'สวัสดีครับ เลือกได้เลย หรือพิมพ์ถามตรงๆ ก็ได้\n\n• ถามราคา/ต้นทุน เช่น ต้นทุนขนส่ง 40 กม., ราคาคู่แข่งของรหัสสินค้า, ส่งเองหรือโรงงานส่งถูกกว่า\n• ทำใบขอราคาพิเศษ ระบบจะถามข้อมูลลูกค้ากับสินค้า แล้วทำรูปสรุปให้\n• ขอส่งฟรี ขออนุมัติส่งฟรีด้วยรถบริษัท ระบบตรวจตามหลักเกณฑ์2 แล้วบันทึกลง DATA2\n\nไม่ใช้ AI ก็ได้ กรอกฟอร์มด้านล่างได้เลย พิมพ์ "เริ่มใหม่" เพื่อล้างข้อมูลเมื่อไหร่ก็ได้'});
  const bar=document.createElement('div');bar.className='qact';
- bar.appendChild(qbtn('ถามราคา/ต้นทุน',()=>qsend('ถามราคา/ต้นทุน','ถามราคา/ต้นทุน')));
+ bar.appendChild(qbtn('ถามราคา/ต้นทุน',()=>qsend('ถามราคา/ต้นทุน','ถามราคา/ต้นทุน'),'mbtn-ask'));
  bar.appendChild(qbtn('ทำใบขอราคาพิเศษ',()=>qsend('ทำใบขอราคาพิเศษ','ทำใบขอราคาพิเศษ'),'green'));
+ bar.appendChild(qbtn('ขอส่งฟรี',()=>qsend('ขอส่งฟรี','ขอส่งฟรี'),'mbtn-free'));
  g.appendChild(bar);
 }
 (function(){ // กู้คืนบทสนทนาเมื่อรีเฟรชหน้า (เก็บในเครื่องนี้เท่านั้น นาน 12 ชั่วโมง)
@@ -583,7 +632,7 @@ function qgreet(){
  if(raw){try{const d=JSON.parse(raw);
   if(Date.now()-d.t<QTTL&&d.log&&d.log.length){qstate=d.state||{items:[]};qhist=d.hist||[];qlogData=d.log;qrender();
    qbubble({text:'(กู้คืนบทสนทนาเดิมแล้ว กด "เริ่มใหม่" ถ้าต้องการล้าง)'});return}}catch(e){}}
- qgreet();
+ qmode();qgreet();
 })();
 (function(){const b=document.getElementById('qwide'),m=document.querySelector('main');if(!b||!m)return;
  const set=on=>{m.classList.toggle('qfull',on);b.textContent=on?'ย่อกลับ ⤡':'ขยายเต็มจอ ⤢';qls.set('qfull',on?'1':'0')};
